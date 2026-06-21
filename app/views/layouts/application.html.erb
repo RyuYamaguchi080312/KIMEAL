@@ -23,6 +23,26 @@
   </head>
 
   <body>
+    <header>
+      <nav>
+        <%= link_to "KIMEAL", root_path %>
+
+        <% if user_signed_in? %>
+          <span><%= current_user.name.presence || current_user.email %> さん</span>
+          <%= button_to "ログアウト", destroy_user_session_path, method: :delete %>
+        <% else %>
+          <%= link_to "ログイン", new_user_session_path %>
+          <%= link_to "新規登録", new_user_registration_path %>
+        <% end %>
+      </nav>
+    </header>
+
+    <% flash.each do |type, message| %>
+      <div class="flash flash-<%= type %>" role="alert">
+        <%= message %>
+      </div>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>

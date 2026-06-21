@@ -8,3 +8,42 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.flash {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.flash-notice {
+  border: 1px solid #8bcf9f;
+  background: #eaf8ee;
+  color: #1d6b35;
+}
+
+.flash-alert {
+  border: 1px solid #e6a0a0;
+  background: #fdecec;
+  color: #9f1d1d;
+}
+
+.field_with_errors input,
+input.is-invalid {
+  border: 2px solid #d93025;
+  background: #fff7f7;
+}
+
+.field-error {
+  margin: 4px 0 0;
+  color: #d93025;
+  font-size: 0.9rem;
+}
+
+#error_explanation {
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid #e6a0a0;
+  border-radius: 6px;
+  background: #fdecec;
+  color: #9f1d1d;
+}
