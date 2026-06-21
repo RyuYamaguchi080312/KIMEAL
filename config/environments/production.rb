@@ -46,12 +46,13 @@ Rails.application.configure do
   # 非推奨警告は出力しない
   config.active_support.report_deprecations = false
 
-  # DBバックエンドのキャッシュストアを使う
-  config.cache_store = :solid_cache_store
+  # Render initial deploy uses a single PostgreSQL database. Solid Cache can be
+  # enabled later after its tables are configured.
+  config.cache_store = :memory_store
 
-  # DBバックエンドのジョブキューを使う
-  config.active_job.queue_adapter = :solid_queue
-  config.solid_queue.connects_to = { database: { writing: :queue } }
+  # Keep jobs in-process for the initial Render deployment. Move to a Render
+  # background worker with Solid Queue when asynchronous jobs are introduced.
+  config.active_job.queue_adapter = :async
 
   # メール送信エラーを検知したい場合に設定する
   # config.action_mailer.raise_delivery_errors = false

@@ -498,3 +498,34 @@ Figma：<https://www.figma.com/design/PzEVxVffovL9bxUuK1HjPI/KIMEAL?node-id=0-1&
 
 ### ER図
 ER図：<https://drive.google.com/file/d/1kSRCAYb0JoNwbmEU4xFEZbcHUl-CUg81/view?usp=sharing>
+
+---
+
+## Render デプロイ手順
+
+このリポジトリは `render.yaml` を使った Render Blueprint デプロイに対応しています。
+
+1. 変更を GitHub に push する
+2. Render Dashboard で New Blueprint Instance を選択する
+3. このリポジトリを選択して Blueprint を作成する
+4. `RAILS_MASTER_KEY` にローカルの `config/master.key` の内容を設定する
+5. Blueprint を承認してデプロイする
+6. デプロイ後、Render が発行する `.onrender.com` URL と `/up` にアクセスして動作確認する
+
+`DATABASE_URL` は `render.yaml` の `fromDatabase` により、Render PostgreSQL の接続文字列が自動で設定されます。
+
+### 手動で Web Service を作成する場合
+
+Blueprint を使わない場合は、Render の Web Service に以下を設定します。
+
+* Runtime: Ruby
+* Build Command: `bash ./bin/render-build.sh`
+* Start Command: `./bin/rails server`
+* Health Check Path: `/up`
+* Environment Variables:
+  * `DATABASE_URL`: Render PostgreSQL の Internal Database URL
+  * `RAILS_MASTER_KEY`: `config/master.key` の内容
+  * `RAILS_ENV`: `production`
+  * `RACK_ENV`: `production`
+  * `WEB_CONCURRENCY`: `2`
+  * `RAILS_MAX_THREADS`: `3`
