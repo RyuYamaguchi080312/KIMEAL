@@ -2,4 +2,15 @@
   <h1>ホーム画面</h1>
   <p><%= current_user.name.presence || current_user.email %> さん、ログイン中です。</p>
   <p>ホーム画面の本実装は #18 で対応予定です。</p>
+
+  <% if current_user.admin? %>
+    <section class="admin-menu" aria-labelledby="admin-menu-title">
+      <h2 id="admin-menu-title">管理者メニュー</h2>
+      <div class="admin-menu-actions">
+        <button type="button">レシピ管理</button>
+        <button type="button">タグ管理</button>
+        <button type="button">カテゴリ管理</button>
+      </div>
+    </section>
+  <% end %>
 </main>
