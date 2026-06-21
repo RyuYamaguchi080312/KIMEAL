@@ -29,10 +29,17 @@ class UserTest < ActiveSupport::TestCase
     assert_includes user.errors[:password], "を入力してください"
   end
 
-  test "ロールを設定できる" do
-    user = User.new(email: "user@example.com", password: "password", role: 1)
+  test "デフォルトのロールは一般ユーザーである" do
+    user = User.new(email: "user@example.com", password: "password")
 
     assert user.valid?
-    assert_equal 1, user.role
+    assert_predicate user, :general?
+  end
+
+  test "管理者ロールを設定できる" do
+    user = User.new(email: "admin@example.com", password: "password", role: :admin)
+
+    assert user.valid?
+    assert_predicate user, :admin?
   end
 end
