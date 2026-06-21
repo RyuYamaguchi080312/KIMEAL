@@ -16,6 +16,7 @@ ja:
   devise:
     failure:
       invalid: "メールアドレスまたはパスワードが違います。"
+      not_found_in_database: "メールアドレスまたはパスワードが違います。"
       unauthenticated: "ログインしてください。"
     registrations:
       signed_up: "アカウント登録が完了しました。"

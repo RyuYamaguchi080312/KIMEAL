@@ -37,8 +37,10 @@ class UserLoginTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_select ".flash-notice", text: "ログインしました。"
-    assert_select "h1", text: "ホーム画面"
-    assert_select "p", text: /テストユーザー さん、ログイン中です。/
+    assert_select "h1", text: "今日のごはんを決めましょう"
+    assert_select "p", text: /ようこそ、テストユーザー さん/
+    assert_select "a", text: "今日の料理を探す"
+    assert_select "a[href='#{recipes_path}']", text: "レシピ一覧"
     assert_select "button", text: "ログアウト"
   end
 
@@ -56,6 +58,7 @@ class UserLoginTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_select ".flash-notice", text: "ログアウトしました。"
+    assert_select ".absolute.top-20 .flash-notice", text: "ログアウトしました。"
     assert_select "h1", text: "KIMEAL"
   end
 
@@ -64,6 +67,19 @@ class UserLoginTest < ActionDispatch::IntegrationTest
       user: {
         email: @user.email,
         password: "wrong-password"
+      }
+    }
+
+    assert_response :unprocessable_content
+    assert_select ".flash-alert", text: "メールアドレスまたはパスワードが違います。"
+    assert_select "form[action='#{user_session_path}']"
+  end
+
+  test "未登録のメールアドレスでログインに失敗するとエラーメッセージが表示される" do
+    post user_session_path, params: {
+      user: {
+        email: "missing@example.com",
+        password: "password"
       }
     }
 
