@@ -11,7 +11,7 @@ class UserTest < ActiveSupport::TestCase
     user = User.new(password: "password")
 
     assert_not user.valid?
-    assert_includes user.errors[:email], "can't be blank"
+    assert_includes user.errors[:email], "を入力してください"
   end
 
   test "メールアドレスは一意である" do
@@ -19,14 +19,14 @@ class UserTest < ActiveSupport::TestCase
     user = User.new(email: "user@example.com", password: "password")
 
     assert_not user.valid?
-    assert_includes user.errors[:email], "has already been taken"
+    assert_includes user.errors[:email], "はすでに存在します"
   end
 
   test "パスワードは必須である" do
     user = User.new(email: "user@example.com")
 
     assert_not user.valid?
-    assert_includes user.errors[:password], "can't be blank"
+    assert_includes user.errors[:password], "を入力してください"
   end
 
   test "ロールを設定できる" do

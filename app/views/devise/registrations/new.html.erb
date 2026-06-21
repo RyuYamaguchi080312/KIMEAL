@@ -5,12 +5,18 @@
 
   <div>
     <%= f.label :name, "名前" %><br>
-    <%= f.text_field :name, autofocus: true, autocomplete: "name" %>
+    <%= f.text_field :name, autofocus: true, autocomplete: "name", class: ("is-invalid" if resource.errors[:name].any?) %>
+    <% resource.errors[:name].each do |message| %>
+      <p class="field-error">名前<%= message %></p>
+    <% end %>
   </div>
 
   <div>
     <%= f.label :email, "メールアドレス" %><br>
-    <%= f.email_field :email, autocomplete: "email" %>
+    <%= f.email_field :email, autocomplete: "email", class: ("is-invalid" if resource.errors[:email].any?) %>
+    <% resource.errors[:email].each do |message| %>
+      <p class="field-error">メールアドレス<%= message %></p>
+    <% end %>
   </div>
 
   <div>
@@ -18,12 +24,18 @@
     <% if @minimum_password_length %>
       <em>(<%= @minimum_password_length %>文字以上)</em>
     <% end %><br>
-    <%= f.password_field :password, autocomplete: "new-password" %>
+    <%= f.password_field :password, autocomplete: "new-password", class: ("is-invalid" if resource.errors[:password].any?) %>
+    <% resource.errors[:password].each do |message| %>
+      <p class="field-error">パスワード<%= message %></p>
+    <% end %>
   </div>
 
   <div>
     <%= f.label :password_confirmation, "パスワード確認" %><br>
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+    <%= f.password_field :password_confirmation, autocomplete: "new-password", class: ("is-invalid" if resource.errors[:password_confirmation].any?) %>
+    <% resource.errors[:password_confirmation].each do |message| %>
+      <p class="field-error">パスワード確認<%= message %></p>
+    <% end %>
   </div>
 
   <div>
