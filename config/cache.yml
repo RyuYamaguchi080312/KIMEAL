@@ -1,0 +1,15 @@
+default: &default
+  store_options:
+    # 保持期限を設けたい場合に最古キャッシュの上限を指定する
+    # max_age: <%= 60.days.to_i %>
+    max_size: <%= 256.megabytes %>
+    namespace: <%= Rails.env %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

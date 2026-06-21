@@ -1,0 +1,10 @@
+# developmentのasyncアダプタは同一プロセス内でのみ動作する。
+# コンソールから画面へ反映を確認したい場合はWeb Consoleを使う。
+development:
+  adapter: async
+
+test:
+  adapter: test
+
+production:
+  adapter: async
