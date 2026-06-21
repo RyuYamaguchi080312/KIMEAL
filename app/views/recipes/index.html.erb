@@ -1,0 +1,19 @@
+<main class="mx-auto max-w-5xl px-4 py-10">
+  <div class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-orange-100">
+    <h1 class="text-2xl font-bold text-stone-950">レシピ一覧</h1>
+    <p class="mt-3 text-sm text-stone-600">レシピ一覧の本実装は今後のタスクで対応予定です。</p>
+
+    <% if @recipes.any? %>
+      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <% @recipes.each do |recipe| %>
+          <article class="rounded-lg border border-orange-100 bg-orange-50/40 p-4">
+            <h2 class="font-semibold text-stone-950"><%= recipe.title %></h2>
+            <p class="mt-2 text-sm text-stone-600"><%= recipe.category.name %></p>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="mt-6 rounded-lg bg-orange-50 p-4 text-sm text-stone-600">まだレシピが登録されていません。</p>
+    <% end %>
+  </div>
+</main>

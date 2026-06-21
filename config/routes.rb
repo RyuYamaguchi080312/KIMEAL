@@ -10,4 +10,5 @@ Rails.application.routes.draw do
 
   root "top#index"
   get "home", to: "home#index"
+  resources :recipes, only: [:index]
 end
