@@ -1,0 +1,5 @@
+# Railsの多言語化ファイル。
+# 日本語ファイルを追加する場合は config/locales/ja.yml を作成する。
+
+en:
+  hello: "Hello world"
