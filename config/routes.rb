@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  devise_for :users
+
   # アプリが正常に起動しているか確認するヘルスチェック用ルート
   get "up" => "rails/health#show", as: :rails_health_check
 
