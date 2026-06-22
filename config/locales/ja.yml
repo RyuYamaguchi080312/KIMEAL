@@ -8,6 +8,8 @@ ja:
         name: "名前"
       category:
         name: "カテゴリ名"
+      tag:
+        name: "タグ名"
 
   time:
     formats:
