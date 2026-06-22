@@ -44,6 +44,22 @@ class UserLoginTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "ログアウト"
   end
 
+  test "ログイン済みユーザーがログイン画面にアクセスするとホーム画面へ遷移する" do
+    post user_session_path, params: {
+      user: {
+        email: @user.email,
+        password: "password"
+      }
+    }
+
+    get new_user_session_path
+
+    assert_redirected_to home_path
+    follow_redirect!
+    assert_response :success
+    assert_select ".flash-alert", text: "すでにログインしています。"
+  end
+
   test "ログイン済みユーザーはログアウト後にトップページへ遷移する" do
     post user_session_path, params: {
       user: {
