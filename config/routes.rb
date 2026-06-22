@@ -13,7 +13,7 @@ Rails.application.routes.draw do
   resources :recipes, only: [:index]
 
   namespace :admin do
-    resources :categories, only: [:index, :create, :update, :destroy]
-    resources :tags, only: [:index, :create, :update, :destroy]
+    resources :categories, only: [:index, :create, :edit, :update, :destroy]
+    resources :tags, only: [:index, :create, :edit, :update, :destroy]
   end
 end

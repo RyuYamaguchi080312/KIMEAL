@@ -1,7 +1,7 @@
 module Admin
   class TagsController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_tag, only: [:update, :destroy]
+    before_action :set_tag, only: [:edit, :update, :destroy]
 
     def index
       authorize Tag
@@ -23,14 +23,17 @@ module Admin
       end
     end
 
+    def edit
+      authorize @tag
+    end
+
     def update
       authorize @tag
 
       if @tag.update(tag_params)
         redirect_to admin_tags_path, notice: "タグを更新しました。"
       else
-        @tags = Tag.order(:created_at)
-        render :index, status: :unprocessable_content
+        render :edit, status: :unprocessable_content
       end
     end
 

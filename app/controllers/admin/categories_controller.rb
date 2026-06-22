@@ -1,7 +1,7 @@
 module Admin
   class CategoriesController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_category, only: [:update, :destroy]
+    before_action :set_category, only: [:edit, :update, :destroy]
 
     def index
       authorize Category
@@ -23,14 +23,17 @@ module Admin
       end
     end
 
+    def edit
+      authorize @category
+    end
+
     def update
       authorize @category
 
       if @category.update(category_params)
         redirect_to admin_categories_path, notice: "カテゴリを更新しました。"
       else
-        @categories = Category.order(:created_at)
-        render :index, status: :unprocessable_content
+        render :edit, status: :unprocessable_content
       end
     end
 

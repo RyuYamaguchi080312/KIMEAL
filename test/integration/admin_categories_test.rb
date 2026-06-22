@@ -11,7 +11,8 @@ class AdminCategoriesTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "カテゴリ管理"
     assert_select "h2", text: "カテゴリ一覧"
-    assert_select "input[value='主菜']"
+    assert_select "li", text: /主菜/
+    assert_select "a[href='#{edit_admin_category_path(Category.last)}']", text: "編集"
   end
 
   test "管理者はカテゴリを追加できる" do
@@ -31,7 +32,19 @@ class AdminCategoriesTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_select ".flash-notice", text: "カテゴリを追加しました。"
-    assert_select "input[value='副菜']"
+    assert_select "li", text: /副菜/
+  end
+
+  test "管理者はカテゴリ編集画面を表示できる" do
+    admin = create_user(role: :admin, email: "admin-edit-category@example.com")
+    category = Category.create!(name: "主菜")
+
+    sign_in_as(admin)
+    get edit_admin_category_path(category)
+
+    assert_response :success
+    assert_select "h1", text: "カテゴリ編集"
+    assert_select "input[value='主菜']"
   end
 
   test "管理者はカテゴリを編集できる" do
@@ -50,7 +63,7 @@ class AdminCategoriesTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_select ".flash-notice", text: "カテゴリを更新しました。"
-    assert_select "input[value='ごはんもの']"
+    assert_select "li", text: /ごはんもの/
     assert_equal "ごはんもの", category.reload.name
   end
 
@@ -67,6 +80,7 @@ class AdminCategoriesTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :unprocessable_content
+    assert_select "h1", text: "カテゴリ編集"
     assert_select ".field-error", text: "カテゴリ名を入力してください"
     assert_select "input[name='category[name]'].is-invalid"
     assert_equal "主食", category.reload.name
