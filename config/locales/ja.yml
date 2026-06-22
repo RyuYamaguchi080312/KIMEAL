@@ -23,6 +23,7 @@ ja:
 
   devise:
     failure:
+      already_authenticated: "すでにログインしています。"
       invalid: "メールアドレスまたはパスワードが違います。"
       not_found_in_database: "メールアドレスまたはパスワードが違います。"
       unauthenticated: "ログインしてください。"
