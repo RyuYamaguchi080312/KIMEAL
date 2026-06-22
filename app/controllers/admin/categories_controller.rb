@@ -1,13 +1,14 @@
 module Admin
   class CategoriesController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_category, only: [:edit, :update, :destroy]
+    before_action :set_category, only: [:update, :destroy]
 
     def index
       authorize Category
 
       @category = Category.new
       @categories = Category.order(:created_at)
+      @editing_category_id = params[:editing_category_id].to_s
     end
 
     def create
@@ -19,12 +20,9 @@ module Admin
         redirect_to admin_categories_path, notice: "カテゴリを追加しました。"
       else
         @categories = Category.order(:created_at)
+        @editing_category_id = nil
         render :index, status: :unprocessable_content
       end
-    end
-
-    def edit
-      authorize @category
     end
 
     def update
@@ -33,7 +31,10 @@ module Admin
       if @category.update(category_params)
         redirect_to admin_categories_path, notice: "カテゴリを更新しました。"
       else
-        render :edit, status: :unprocessable_content
+        @editing_category_id = @category.id.to_s
+        @categories = Category.order(:created_at).map { |category| category.id == @category.id ? @category : category }
+        @category = Category.new
+        render :index, status: :unprocessable_content
       end
     end
 

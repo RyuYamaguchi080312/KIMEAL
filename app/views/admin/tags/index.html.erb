@@ -35,15 +35,49 @@
         <ul class="mt-6 space-y-4">
           <% @tags.each do |tag| %>
             <li class="flex flex-col gap-4 rounded-lg border border-orange-100 bg-orange-50/40 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p class="font-semibold text-stone-900"><%= tag.name %></p>
-                <p class="mt-1 text-xs text-stone-500">作成日時: <%= l(tag.created_at, format: :short) %></p>
-              </div>
+              <% if @editing_tag_id == tag.id.to_s %>
+                <%= form_with model: [:admin, tag], class: "flex flex-1 flex-col gap-3 sm:flex-row sm:items-start" do |f| %>
+                  <div class="flex-1">
+                    <%= f.label :name, "タグ名", class: "sr-only" %>
+                    <%= f.text_field :name, class: ["w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2", tag.errors[:name].any? ? "is-invalid border-red-500 focus:ring-red-100" : "border-orange-200 bg-white focus:border-orange-400 focus:ring-orange-100"] %>
+                    <% tag.errors[:name].each do |message| %>
+                      <p class="field-error">タグ名<%= message %></p>
+                    <% end %>
+                    <p class="mt-1 text-xs text-stone-500">作成日時: <%= l(tag.created_at, format: :short) %></p>
+                  </div>
 
-              <div class="flex gap-2 sm:justify-end">
-                <%= link_to "編集", edit_admin_tag_path(tag), class: "rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600" %>
-                <%= button_to "削除", admin_tag_path(tag), method: :delete, form: { data: { turbo_confirm: "タグ「#{tag.name}」を削除しますか？" } }, class: "rounded-md border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50" %>
-              </div>
+                  <div class="flex gap-2">
+                    <%= f.button type: :submit, aria: { label: "更新" }, class: "inline-flex size-10 items-center justify-center rounded-md bg-orange-500 text-white hover:bg-orange-600" do %>
+                      <svg aria-hidden="true" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-7.5 9.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.908 3.907 6.964-8.817a.75.75 0 0 1 1.052-.157Z" clip-rule="evenodd" />
+                      </svg>
+                    <% end %>
+                    <%= link_to admin_tags_path, aria: { label: "キャンセル" }, class: "inline-flex size-10 items-center justify-center rounded-md border border-orange-200 text-orange-700 hover:bg-orange-50" do %>
+                      <svg aria-hidden="true" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                      </svg>
+                    <% end %>
+                  </div>
+                <% end %>
+              <% else %>
+                <div>
+                  <p class="font-semibold text-stone-900"><%= tag.name %></p>
+                  <p class="mt-1 text-xs text-stone-500">作成日時: <%= l(tag.created_at, format: :short) %></p>
+                </div>
+
+                <div class="flex gap-2 sm:justify-end">
+                  <%= link_to admin_tags_path(editing_tag_id: tag.id), aria: { label: "編集" }, class: "inline-flex size-10 items-center justify-center rounded-md bg-orange-500 text-white hover:bg-orange-600" do %>
+                    <svg aria-hidden="true" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="m13.498 3.59 2.912 2.912a2.125 2.125 0 0 1 0 3.005l-6.86 6.86a2.75 2.75 0 0 1-1.351.728l-3.048.677a.75.75 0 0 1-.894-.894l.677-3.048a2.75 2.75 0 0 1 .728-1.35l6.86-6.86a2.125 2.125 0 0 1 3.005 0ZM12.438 4.65l-5.716 5.716 2.912 2.912 5.716-5.716a.625.625 0 0 0 0-.884l-2.028-2.028a.625.625 0 0 0-.884 0ZM5.97 13.423a1.25 1.25 0 0 0-.331.614l-.373 1.678 1.678-.373a1.25 1.25 0 0 0 .614-.331l.989-.989-2.588-2.588-.989.989Z" />
+                    </svg>
+                  <% end %>
+                  <%= button_to admin_tag_path(tag), method: :delete, form: { data: { turbo_confirm: "タグ「#{tag.name}」を削除しますか？" } }, aria: { label: "削除" }, class: "inline-flex size-10 items-center justify-center rounded-md border border-red-200 text-red-600 hover:bg-red-50" do %>
+                    <svg aria-hidden="true" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M8.75 1.75A2.25 2.25 0 0 0 6.5 4v.25H3.75a.75.75 0 0 0 0 1.5h.3l.76 10.28a2.25 2.25 0 0 0 2.244 2.084h5.892a2.25 2.25 0 0 0 2.244-2.084l.76-10.28h.3a.75.75 0 0 0 0-1.5H13.5V4a2.25 2.25 0 0 0-2.25-2.25h-2.5ZM8 4a.75.75 0 0 1 .75-.75h2.5A.75.75 0 0 1 12 4v.25H8V4Zm.25 4.75a.75.75 0 0 0-1.5 0v5.5a.75.75 0 0 0 1.5 0v-5.5Zm5 0a.75.75 0 0 0-1.5 0v5.5a.75.75 0 0 0 1.5 0v-5.5Z" clip-rule="evenodd" />
+                    </svg>
+                  <% end %>
+                </div>
+              <% end %>
             </li>
           <% end %>
         </ul>

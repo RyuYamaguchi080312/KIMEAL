@@ -12,7 +12,7 @@ class AdminTagsTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "タグ管理"
     assert_select "h2", text: "タグ一覧"
     assert_select "li", text: /さっぱり/
-    assert_select "a[href='#{edit_admin_tag_path(Tag.last)}']", text: "編集"
+    assert_select "a[href='#{admin_tags_path(editing_tag_id: Tag.last.id)}'][aria-label='編集']"
   end
 
   test "管理者はタグを追加できる" do
@@ -54,16 +54,18 @@ class AdminTagsTest < ActionDispatch::IntegrationTest
     assert_select "input[name='tag[name]'].is-invalid"
   end
 
-  test "管理者はタグ編集画面を表示できる" do
+  test "管理者は編集ボタンで対象タグを編集モードにできる" do
     admin = create_user(role: :admin, email: "admin-edit-tag@example.com")
     tag = Tag.create!(name: "さっぱり")
 
     sign_in_as(admin)
-    get edit_admin_tag_path(tag)
+    get admin_tags_path(editing_tag_id: tag.id)
 
     assert_response :success
-    assert_select "h1", text: "タグ編集"
+    assert_select "h1", text: "タグ管理"
     assert_select "input[value='さっぱり']"
+    assert_select "button[aria-label='更新']"
+    assert_select "a[href='#{admin_tags_path}'][aria-label='キャンセル']"
   end
 
   test "管理者はタグを編集できる" do
@@ -99,7 +101,7 @@ class AdminTagsTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :unprocessable_content
-    assert_select "h1", text: "タグ編集"
+    assert_select "h1", text: "タグ管理"
     assert_select ".field-error", text: "タグ名を入力してください"
     assert_select "input[name='tag[name]'].is-invalid"
     assert_equal "気軽", tag.reload.name
