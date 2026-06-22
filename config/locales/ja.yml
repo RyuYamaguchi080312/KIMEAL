@@ -6,6 +6,12 @@ ja:
         password: "パスワード"
         password_confirmation: "パスワード確認"
         name: "名前"
+      category:
+        name: "カテゴリ名"
+
+  time:
+    formats:
+      short: "%Y/%m/%d %H:%M"
 
   errors:
     format: "%{attribute}%{message}"
