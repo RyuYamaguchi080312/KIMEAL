@@ -1,0 +1,126 @@
+<main class="mx-auto max-w-3xl px-4 py-10">
+  <section class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-orange-100" aria-labelledby="recipe-form-title">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h1 id="recipe-form-title" class="text-2xl font-bold text-stone-950">レシピ登録</h1>
+        <p class="mt-3 text-sm text-stone-600">管理者がアプリ内に表示するレシピを登録します。</p>
+      </div>
+
+      <%= link_to "キャンセル", admin_recipes_path, class: "rounded-lg border border-orange-200 px-4 py-2 text-center text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
+    </div>
+
+    <%= form_with model: [:admin, @recipe], class: "mt-8 space-y-6" do |f| %>
+      <% if @recipe.errors.any? %>
+        <div id="error_explanation">
+          <h2>入力内容を確認してください</h2>
+          <ul>
+            <% @recipe.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :title, "レシピ名", class: "block text-sm font-medium text-stone-700" %>
+        <%= f.text_field :title, class: ["mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2", @recipe.errors[:title].any? ? "is-invalid border-red-500 focus:ring-red-100" : "border-orange-200 focus:border-orange-400 focus:ring-orange-100"] %>
+        <% @recipe.errors[:title].each do |message| %>
+          <p class="field-error">レシピ名<%= message %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= f.label :description, "説明", class: "block text-sm font-medium text-stone-700" %>
+        <%= f.text_area :description, rows: 3, class: "mt-1 w-full rounded-md border border-orange-200 px-3 py-2 text-sm shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" %>
+      </div>
+
+      <div>
+        <%= f.label :image, "料理画像", class: "block text-sm font-medium text-stone-700" %>
+        <%= f.file_field :image, accept: "image/*", class: "mt-1 w-full rounded-md border border-orange-200 px-3 py-2 text-sm shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-orange-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-orange-700 hover:file:bg-orange-100 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" %>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2">
+        <div>
+          <%= f.label :category_name, "カテゴリ", class: "block text-sm font-medium text-stone-700" %>
+          <%= f.text_field :category_name, list: "category-options", placeholder: "カテゴリを選択または入力", class: ["mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2", @recipe.errors[:category].any? || @recipe.errors[:category_id].any? ? "is-invalid border-red-500 focus:ring-red-100" : "border-orange-200 focus:border-orange-400 focus:ring-orange-100"] %>
+          <datalist id="category-options">
+            <% @categories.each do |category| %>
+              <option value="<%= category.name %>"></option>
+            <% end %>
+          </datalist>
+          <% (@recipe.errors[:category] + @recipe.errors[:category_id]).each do |message| %>
+            <p class="field-error">カテゴリ<%= message %></p>
+          <% end %>
+        </div>
+
+        <div>
+          <%= f.label :cooking_time, "調理時間（分）", class: "block text-sm font-medium text-stone-700" %>
+          <%= f.number_field :cooking_time, min: 0, class: "mt-1 w-full rounded-md border border-orange-200 px-3 py-2 text-sm shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :ingredients, "材料", class: "block text-sm font-medium text-stone-700" %>
+        <%= f.text_area :ingredients, rows: 5, class: "mt-1 w-full rounded-md border border-orange-200 px-3 py-2 text-sm shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" %>
+      </div>
+
+      <div>
+        <%= f.label :instructions, "作り方", class: "block text-sm font-medium text-stone-700" %>
+        <%= f.text_area :instructions, rows: 5, class: "mt-1 w-full rounded-md border border-orange-200 px-3 py-2 text-sm shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" %>
+      </div>
+
+      <fieldset data-controller="tag-fields">
+        <legend class="text-sm font-medium text-stone-700">タグ</legend>
+        <datalist id="tag-options">
+          <% @tags.each do |tag| %>
+            <option value="<%= tag.name %>"></option>
+          <% end %>
+        </datalist>
+
+        <div class="mt-2 space-y-2" data-tag-fields-target="container">
+          <% (Array(@recipe.tag_names).presence || [""]).each do |tag_name| %>
+            <div class="flex gap-2" data-tag-fields-item>
+              <%= text_field_tag "recipe[tag_names][]", tag_name, list: "tag-options", placeholder: "タグを選択または入力", class: "w-full rounded-md border border-orange-200 px-3 py-2 text-sm shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100" %>
+              <button type="button" aria-label="タグ欄を削除" class="inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-red-200 text-red-600 hover:bg-red-50" data-action="tag-fields#remove">
+                <svg aria-hidden="true" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5.75 9.25a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5Z" />
+                </svg>
+              </button>
+            </div>
+          <% end %>
+        </div>
+
+        <template data-tag-fields-target="template">
+          <div class="flex gap-2" data-tag-fields-item>
+            <input type="text" name="recipe[tag_names][]" list="tag-options" placeholder="タグを選択または入力" class="w-full rounded-md border border-orange-200 px-3 py-2 text-sm shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
+            <button type="button" aria-label="タグ欄を削除" class="inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-red-200 text-red-600 hover:bg-red-50" data-action="tag-fields#remove">
+              <svg aria-hidden="true" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5.75 9.25a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5Z" />
+              </svg>
+            </button>
+          </div>
+        </template>
+
+        <button type="button" aria-label="タグ欄を追加" class="mt-3 inline-flex items-center gap-2 rounded-md border border-orange-200 px-3 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-50" data-action="tag-fields#add">
+          <svg aria-hidden="true" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+          </svg>
+          タグを追加
+        </button>
+
+        <% if @tags.any? %>
+          <p class="mt-2 text-xs text-stone-500">
+            既存タグ: <%= @tags.map(&:name).join("、") %>
+          </p>
+        <% else %>
+          <p class="mt-2 rounded-lg bg-orange-50 p-3 text-sm text-stone-600">タグはまだ登録されていません。入力すると新規タグとして追加されます。</p>
+        <% end %>
+      </fieldset>
+
+      <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <%= link_to "キャンセル", admin_recipes_path, class: "rounded-lg border border-orange-200 px-5 py-3 text-center text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
+        <%= f.submit "登録", class: "rounded-lg bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-orange-600" %>
+      </div>
+    <% end %>
+  </section>
+</main>

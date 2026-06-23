@@ -41,6 +41,7 @@ class UserLoginTest < ActionDispatch::IntegrationTest
     assert_select "p", text: /ようこそ、テストユーザー さん/
     assert_select "a", text: "今日の料理を探す"
     assert_select "a[href='#{recipes_path}']", text: "レシピ一覧"
+    assert_select "a[href='#{home_path}']", text: /KIMEAL/
     assert_select "button", text: "ログアウト"
   end
 
