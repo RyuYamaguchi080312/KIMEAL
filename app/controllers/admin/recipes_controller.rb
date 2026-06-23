@@ -1,7 +1,7 @@
 module Admin
   class RecipesController < ApplicationController
     before_action :authenticate_user!
-    before_action :set_recipe, only: [:edit, :update]
+    before_action :set_recipe, only: [:edit, :update, :destroy]
 
     def index
       authorize Recipe
@@ -56,6 +56,13 @@ module Admin
         prepare_form_options
         render :edit, status: :unprocessable_content
       end
+    end
+
+    def destroy
+      authorize @recipe
+
+      @recipe.destroy!
+      redirect_to admin_recipes_path, notice: "レシピを削除しました。"
     end
 
     private
