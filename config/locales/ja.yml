@@ -10,6 +10,15 @@ ja:
         name: "カテゴリ名"
       tag:
         name: "タグ名"
+      recipe:
+        title: "レシピ名"
+        description: "説明"
+        image: "料理画像"
+        ingredients: "材料"
+        instructions: "作り方"
+        cooking_time: "調理時間"
+        category: "カテゴリ"
+        category_id: "カテゴリ"
 
   time:
     formats:

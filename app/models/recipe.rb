@@ -1,5 +1,9 @@
 class Recipe < ApplicationRecord
+  attr_accessor :category_name, :tag_names
+
   belongs_to :category
+
+  has_one_attached :image
 
   has_many :recipe_tags, dependent: :destroy
   has_many :tags, through: :recipe_tags
@@ -10,5 +14,6 @@ class Recipe < ApplicationRecord
   enum :source_type, { original: 0, external_api: 1 }
 
   validates :title, presence: true
+  validates :category, presence: true
   validates :source_type, presence: true
 end
