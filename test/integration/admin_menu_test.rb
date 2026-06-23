@@ -20,7 +20,7 @@ class AdminMenuTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h2", text: "管理者メニュー"
-    assert_select "button", text: "レシピ管理"
+    assert_select "a[href='#{admin_recipes_path}']", text: "レシピ管理"
     assert_select "a[href='#{admin_tags_path}']", text: "タグ管理"
     assert_select "a[href='#{admin_categories_path}']", text: "カテゴリ管理"
   end
@@ -43,7 +43,7 @@ class AdminMenuTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h2", text: "管理者メニュー", count: 0
-    assert_select "button", text: "レシピ管理", count: 0
+    assert_select "a[href='#{admin_recipes_path}']", text: "レシピ管理", count: 0
     assert_select "a[href='#{admin_tags_path}']", text: "タグ管理", count: 0
     assert_select "a[href='#{admin_categories_path}']", text: "カテゴリ管理", count: 0
   end
