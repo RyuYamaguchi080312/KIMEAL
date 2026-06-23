@@ -27,6 +27,7 @@ class AdminRecipesTest < ActionDispatch::IntegrationTest
     assert_select "li", text: /時短/
     assert_select "li", text: /20分/
     assert_select "a[aria-label='編集'][href='#{edit_admin_recipe_path(recipe)}']"
+    assert_select "form[action='#{admin_recipe_path(recipe)}'][method='post'][data-turbo-confirm='レシピ「親子丼」を削除しますか？']"
     assert_select "button[aria-label='削除']"
   end
 
@@ -300,6 +301,50 @@ class AdminRecipesTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to root_path
     assert_equal "親子丼", recipe.reload.title
+  end
+
+  test "管理者はレシピを削除できる" do
+    admin = create_user(role: :admin, email: "admin-delete-recipe@example.com")
+    category = Category.create!(name: "主食")
+    tag = Tag.create!(name: "定番")
+    recipe = Recipe.create!(
+      category: category,
+      title: "親子丼",
+      source_type: :original
+    )
+    RecipeTag.create!(recipe: recipe, tag: tag)
+
+    sign_in_as(admin)
+
+    assert_difference "Recipe.count", -1 do
+      delete admin_recipe_path(recipe)
+    end
+
+    assert_redirected_to admin_recipes_path
+    assert_equal 0, RecipeTag.where(recipe_id: recipe.id).count
+
+    follow_redirect!
+    assert_response :success
+    assert_select ".flash-notice", text: "レシピを削除しました。"
+    assert_select "li", text: /親子丼/, count: 0
+  end
+
+  test "一般ユーザーはレシピを削除できない" do
+    user = create_user(role: :general, email: "general-delete-recipe@example.com")
+    category = Category.create!(name: "主食")
+    recipe = Recipe.create!(
+      category: category,
+      title: "親子丼",
+      source_type: :original
+    )
+
+    sign_in_as(user)
+
+    assert_no_difference "Recipe.count" do
+      delete admin_recipe_path(recipe)
+    end
+
+    assert_redirected_to root_path
   end
 
   test "一般ユーザーはレシピ登録画面を表示できない" do
