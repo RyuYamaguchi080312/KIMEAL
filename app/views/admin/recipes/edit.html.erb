@@ -2,13 +2,13 @@
   <section class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-orange-100" aria-labelledby="recipe-form-title">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 id="recipe-form-title" class="text-2xl font-bold text-stone-950">レシピ登録</h1>
-        <p class="mt-3 text-sm text-stone-600">管理者がアプリ内に表示するレシピを登録します。</p>
+        <h1 id="recipe-form-title" class="text-2xl font-bold text-stone-950">レシピ編集</h1>
+        <p class="mt-3 text-sm text-stone-600">登録済みレシピの内容、カテゴリ、タグを更新します。</p>
       </div>
 
       <%= link_to "キャンセル", admin_recipes_path, class: "rounded-lg border border-orange-200 px-4 py-2 text-center text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
     </div>
 
-    <%= render "form", recipe: @recipe, categories: @categories, tags: @tags, submit_label: "登録" %>
+    <%= render "form", recipe: @recipe, categories: @categories, tags: @tags, submit_label: "更新" %>
   </section>
 </main>
