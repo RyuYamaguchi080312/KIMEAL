@@ -16,4 +16,5 @@ class Recipe < ApplicationRecord
   validates :title, presence: true
   validates :category, presence: true
   validates :source_type, presence: true
+  validates :external_id, uniqueness: { scope: :source_type }, allow_blank: true
 end

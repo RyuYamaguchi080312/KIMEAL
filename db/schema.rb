@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_23_134550) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_24_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -46,6 +46,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_23_134550) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "external_id"
+    t.index ["external_id"], name: "index_categories_on_external_id", unique: true
     t.index ["name"], name: "index_categories_on_name", unique: true
   end
 
@@ -95,6 +97,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_23_134550) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_recipes_on_category_id"
+    t.index ["source_type", "external_id"], name: "index_recipes_on_source_type_and_external_id", unique: true
   end
 
   create_table "swipes", force: :cascade do |t|

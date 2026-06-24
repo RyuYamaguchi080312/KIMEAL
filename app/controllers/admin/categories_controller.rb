@@ -54,7 +54,7 @@ module Admin
     end
 
     def category_params
-      params.require(:category).permit(:name)
+      params.require(:category).permit(:name, :external_id)
     end
   end
 end
