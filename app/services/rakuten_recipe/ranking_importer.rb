@@ -2,6 +2,8 @@
 
 module RakutenRecipe
   class RankingImporter
+    class ImportError < StandardError; end
+
     def initialize(client: Client.new)
       @client = client
     end
@@ -11,6 +13,8 @@ module RakutenRecipe
 
       recipes = Array(client.category_ranking(category_id: category.external_id)["result"])
       recipes.map { |recipe_data| save_recipe(category, recipe_data) }
+    rescue ActiveRecord::RecordInvalid, KeyError => e
+      raise ImportError, "Rakuten recipe ranking import failed: #{e.message}"
     end
 
     private
@@ -18,24 +22,15 @@ module RakutenRecipe
     attr_reader :client
 
     def save_recipe(category, recipe_data)
-      external_id = recipe_data.fetch("recipeId").to_s
-      recipe = Recipe.find_or_initialize_by(source_type: :external_api, external_id: external_id)
-
-      recipe.assign_attributes(
-        category: category,
-        title: recipe_data.fetch("recipeTitle"),
-        description: recipe_data["recipeDescription"],
-        image_url: recipe_data["foodImageUrl"].presence || recipe_data["mediumImageUrl"] || recipe_data["smallImageUrl"],
-        ingredients: Array(recipe_data["recipeMaterial"]).join("\n"),
-        cooking_time: cooking_time_minutes(recipe_data["recipeIndication"]),
-        source_url: recipe_data["recipeUrl"]
+      attributes = RecipeAttributes.new(recipe_data).to_h
+      recipe = Recipe.find_or_initialize_by(
+        source_type: attributes.fetch(:source_type),
+        external_id: attributes.fetch(:external_id)
       )
+
+      recipe.assign_attributes(attributes.merge(category: category))
       recipe.save!
       recipe
-    end
-
-    def cooking_time_minutes(indication)
-      indication.to_s[/\d+/]&.to_i
     end
   end
 end

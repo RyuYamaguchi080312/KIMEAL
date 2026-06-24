@@ -19,5 +19,7 @@ class RecipesController < ApplicationController
     @rakuten_recipe_error = "楽天レシピAPIの認証情報が設定されていません。"
   rescue RakutenRecipe::Client::RequestError
     @rakuten_recipe_error = "楽天レシピAPIからレシピを取得できませんでした。"
+  rescue RakutenRecipe::RankingImporter::ImportError
+    @rakuten_recipe_error = "楽天レシピを保存できませんでした。"
   end
 end
