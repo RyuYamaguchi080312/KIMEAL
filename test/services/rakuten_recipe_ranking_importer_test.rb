@@ -28,6 +28,14 @@ class RakutenRecipeRankingImporterTest < ActiveSupport::TestCase
     assert_equal "ラム肉の香草焼き", Recipe.external_api.find_by!(external_id: "12345").title
   end
 
+  test "レシピ保存に失敗した場合はImportErrorを返す" do
+    category = Category.create!(name: "ラム肉", external_id: "10-69-45")
+
+    assert_raises RakutenRecipe::RankingImporter::ImportError do
+      RakutenRecipe::RankingImporter.new(client: InvalidRankingClient.new).import(category)
+    end
+  end
+
   class FakeRankingClient
     attr_reader :requested_category_ids
 
@@ -47,6 +55,19 @@ class RakutenRecipeRankingImporterTest < ActiveSupport::TestCase
             "recipeMaterial" => ["ラム肉", "塩", "ローズマリー"],
             "recipeIndication" => "約10分",
             "recipeUrl" => "https://recipe.rakuten.co.jp/recipe/12345/"
+          }
+        ]
+      }
+    end
+  end
+
+  class InvalidRankingClient
+    def category_ranking(category_id:)
+      {
+        "result" => [
+          {
+            "recipeId" => "invalid",
+            "recipeTitle" => ""
           }
         ]
       }
