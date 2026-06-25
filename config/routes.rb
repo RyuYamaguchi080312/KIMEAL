@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   get "home", to: "home#index"
   get "conditions", to: "conditions#index"
   resources :recipes, only: [:index, :show]
-  resources :swipes, only: [:index]
+  resources :swipes, only: [:index, :create]
 
   namespace :admin do
     resources :recipes, only: [:index, :new, :create, :edit, :update, :destroy]
