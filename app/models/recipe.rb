@@ -13,6 +13,8 @@ class Recipe < ApplicationRecord
 
   enum :source_type, { original: 0, external_api: 1 }
 
+  scope :random_order, -> { order(Arel.sql("RANDOM()")) }
+
   validates :title, presence: true
   validates :category, presence: true
   validates :source_type, presence: true
