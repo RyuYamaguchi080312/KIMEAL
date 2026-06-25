@@ -7,6 +7,7 @@ class SwipesController < ApplicationController
     @recipes = filtered_recipes
     @recipe = @recipes.first
     @liked_recipes = liked_recipes
+    record_impression(@recipe) if @recipe.present?
   end
 
   def create
@@ -28,6 +29,7 @@ class SwipesController < ApplicationController
     recipes = recipes.where(category: @selected_category) if @selected_category.present?
     recipes = recipes.where(id: RecipeTag.where(tag_id: @selected_tags.select(:id)).select(:recipe_id)) if @selected_tags.any?
     recipes = recipes.where.not(id: current_user.swipes.select(:recipe_id))
+    recipes = recipes.where.not(id: recent_impression_recipe_ids)
     recipes
   end
 
@@ -46,5 +48,13 @@ class SwipesController < ApplicationController
       category_id: params[:category_id].presence,
       tag_ids: Array(params[:tag_ids]).reject(&:blank?)
     }.compact
+  end
+
+  def recent_impression_recipe_ids
+    current_user.recipe_impressions.order(displayed_at: :desc).limit(1).select(:recipe_id)
+  end
+
+  def record_impression(recipe)
+    current_user.recipe_impressions.create!(recipe: recipe, displayed_at: Time.current)
   end
 end
