@@ -10,7 +10,9 @@ Rails.application.routes.draw do
 
   root "top#index"
   get "home", to: "home#index"
+  get "conditions", to: "conditions#index"
   resources :recipes, only: [:index, :show]
+  resources :swipes, only: [:index]
 
   namespace :admin do
     resources :recipes, only: [:index, :new, :create, :edit, :update, :destroy]
