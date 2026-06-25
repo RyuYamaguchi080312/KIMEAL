@@ -35,6 +35,50 @@ class SwipeRecipeImpressionTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: "親子丼", count: 0
   end
 
+  test "直近表示した複数のレシピを候補から除外する" do
+    user = create_user(email: "swipe-recent-impressions@example.com")
+    category = Category.create!(name: "主菜")
+    fresh_recipe = create_recipe(title: "唐揚げ", category: category)
+    recent_recipe = create_recipe(title: "親子丼", category: category)
+    older_recent_recipe = create_recipe(title: "肉じゃが", category: category)
+    RecipeImpression.create!(
+      user: user,
+      recipe: older_recent_recipe,
+      displayed_at: 2.minutes.ago
+    )
+    RecipeImpression.create!(
+      user: user,
+      recipe: recent_recipe,
+      displayed_at: 1.minute.ago
+    )
+
+    sign_in_as(user)
+    get swipes_path(category_id: category.id)
+
+    assert_response :success
+    assert_select "h2", text: "唐揚げ"
+    assert_select "h2", text: "親子丼", count: 0
+    assert_select "h2", text: "肉じゃが", count: 0
+  end
+
+  test "表示履歴を除外すると候補がなくなる場合は表示履歴のある候補も表示する" do
+    user = create_user(email: "swipe-impression-fallback@example.com")
+    category = Category.create!(name: "主菜")
+    recipe = create_recipe(title: "親子丼", category: category)
+    RecipeImpression.create!(
+      user: user,
+      recipe: recipe,
+      displayed_at: 1.minute.ago
+    )
+
+    sign_in_as(user)
+    get swipes_path(category_id: category.id)
+
+    assert_response :success
+    assert_select "h2", text: "親子丼"
+    assert_select "p", text: "条件に合うレシピがありません。", count: 0
+  end
+
   test "他ユーザーの表示履歴は除外対象にしない" do
     user = create_user(email: "swipe-own-impression@example.com")
     other_user = create_user(email: "swipe-other-impression@example.com")

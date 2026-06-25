@@ -1,4 +1,6 @@
 class SwipesController < ApplicationController
+  RECENT_IMPRESSION_LIMIT = 10
+
   before_action :authenticate_user!
 
   def index
@@ -34,11 +36,19 @@ class SwipesController < ApplicationController
   private
 
   def filtered_recipes
+    recipes = base_filtered_recipes
+    recipes_without_recent_impressions = recipes.where.not(id: recent_impression_recipe_ids)
+
+    return recipes_without_recent_impressions if recipes_without_recent_impressions.exists?
+
+    recipes
+  end
+
+  def base_filtered_recipes
     recipes = Recipe.includes(:category, :tags, image_attachment: :blob).random_order
     recipes = recipes.where(category: @selected_category) if @selected_category.present?
     recipes = recipes.where(id: RecipeTag.where(tag_id: @selected_tags.select(:id)).select(:recipe_id)) if @selected_tags.any?
     recipes = recipes.where.not(id: current_user.swipes.select(:recipe_id))
-    recipes = recipes.where.not(id: recent_impression_recipe_ids)
     recipes
   end
 
@@ -60,7 +70,7 @@ class SwipesController < ApplicationController
   end
 
   def recent_impression_recipe_ids
-    current_user.recipe_impressions.order(displayed_at: :desc).limit(1).select(:recipe_id)
+    current_user.recipe_impressions.order(displayed_at: :desc).limit(RECENT_IMPRESSION_LIMIT).select(:recipe_id)
   end
 
   def record_impression(recipe)
