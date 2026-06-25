@@ -66,7 +66,7 @@ class SwipeRecipeFilterTest < ActionDispatch::IntegrationTest
     get swipes_path(category_id: category.id)
 
     assert_response :success
-    assert_select "p", text: "条件に合うレシピがありません。"
+    assert_select "h2", text: "候補をすべて確認しました"
   end
 
   private

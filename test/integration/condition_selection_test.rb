@@ -12,6 +12,7 @@ class ConditionSelectionTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "条件を選択"
     assert_select "form[action='#{swipes_path}'][method='get']"
+    assert_select "input[type='hidden'][name='reset_progress'][value='true']"
     assert_select "input[name='category_keyword'][placeholder='カテゴリ名で検索']"
     assert_select "select[name='category_id']" do
       assert_select "option", text: "主菜"
