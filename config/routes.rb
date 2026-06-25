@@ -17,7 +17,11 @@ Rails.application.routes.draw do
     end
   end
   resources :recipes, only: [:index, :show]
-  resources :swipes, only: [:index, :create]
+  resources :swipes, only: [:index, :create] do
+    collection do
+      post :select
+    end
+  end
 
   namespace :admin do
     resources :recipes, only: [:index, :new, :create, :edit, :update, :destroy]

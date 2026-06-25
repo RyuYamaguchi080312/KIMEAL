@@ -55,12 +55,11 @@ class CandidateListTest < ActionDispatch::IntegrationTest
       post select_candidate_path(swipe)
     end
 
-    assert_redirected_to candidates_path
+    assert_redirected_to recipe_path(recipe)
     assert_equal recipe, DailySelection.find_by!(user: user, selected_on: Date.current).recipe
     follow_redirect!
     assert_select ".flash-notice", text: "今日の一品を決定しました。"
-    assert_select "h2", text: "今日の一品"
-    assert_select "p", text: "親子丼"
+    assert_select "h1", text: "親子丼"
   end
 
   test "他ユーザーの候補は操作できない" do

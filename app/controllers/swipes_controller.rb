@@ -22,6 +22,15 @@ class SwipesController < ApplicationController
     redirect_to swipes_path(redirect_params)
   end
 
+  def select
+    recipe = Recipe.find(params[:recipe_id])
+    selection = current_user.daily_selections.find_or_initialize_by(selected_on: Date.current)
+    selection.recipe = recipe
+    selection.save!
+
+    redirect_to recipe_path(recipe), notice: "今日の一品を決定しました。"
+  end
+
   private
 
   def filtered_recipes

@@ -10,6 +10,11 @@ export default class extends Controller {
   }
 
   start(event) {
+    if (this.isInteractiveElement(event.target)) {
+      this.ignored = true
+      return
+    }
+
     if (event.clientX < this.edgeGuard || window.innerWidth - event.clientX < this.edgeGuard) {
       this.ignored = true
       return
@@ -75,5 +80,9 @@ export default class extends Controller {
     this.startX = 0
     this.startY = 0
     this.currentX = 0
+  }
+
+  isInteractiveElement(element) {
+    return element.closest("a, button, input, select, textarea, label, form")
   }
 }
