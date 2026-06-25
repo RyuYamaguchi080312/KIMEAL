@@ -20,7 +20,7 @@ class CandidatesController < ApplicationController
     selection.recipe = @swipe.recipe
     selection.save!
 
-    redirect_to candidates_path, notice: "今日の一品を決定しました。"
+    redirect_to recipe_path(@swipe.recipe), notice: "今日の一品を決定しました。"
   end
 
   private
