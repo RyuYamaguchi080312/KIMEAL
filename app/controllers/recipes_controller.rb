@@ -7,7 +7,7 @@ class RecipesController < ApplicationController
 
     import_ranking_recipes if @selected_category.present?
 
-    @recipes = Recipe.includes(:category).order(created_at: :desc)
+    @recipes = Recipe.includes(:category, :tags, image_attachment: :blob).order(created_at: :desc)
     @recipes = @recipes.where(category: @selected_category) if @selected_category.present?
   end
 
