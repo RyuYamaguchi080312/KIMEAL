@@ -11,6 +11,11 @@ Rails.application.routes.draw do
   root "top#index"
   get "home", to: "home#index"
   get "conditions", to: "conditions#index"
+  resources :candidates, only: [:index, :destroy] do
+    member do
+      post :select
+    end
+  end
   resources :recipes, only: [:index, :show]
   resources :swipes, only: [:index, :create]
 
