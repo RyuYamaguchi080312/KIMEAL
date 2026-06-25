@@ -6,6 +6,7 @@ class SwipesController < ApplicationController
   def index
     @selected_category = Category.find_by(id: params[:category_id])
     @selected_tags = Tag.where(id: Array(params[:tag_ids]).reject(&:blank?)).order(:name)
+    reset_progress if reset_progress_requested?
     @recipes = filtered_recipes
     @recipe = @recipes.first
     @liked_recipes = liked_recipes
@@ -52,6 +53,13 @@ class SwipesController < ApplicationController
     recipes
   end
 
+  def reset_target_recipes
+    recipes = Recipe.all
+    recipes = recipes.where(category: @selected_category) if @selected_category.present?
+    recipes = recipes.where(id: RecipeTag.where(tag_id: @selected_tags.select(:id)).select(:recipe_id)) if @selected_tags.any?
+    recipes
+  end
+
   def liked_recipes
     recipes = Recipe.includes(:category, :tags, image_attachment: :blob)
                     .joins(:swipes)
@@ -75,5 +83,15 @@ class SwipesController < ApplicationController
 
   def record_impression(recipe)
     current_user.recipe_impressions.create!(recipe: recipe, displayed_at: Time.current)
+  end
+
+  def reset_progress_requested?
+    params[:reset_progress] == "true"
+  end
+
+  def reset_progress
+    target_recipe_ids = reset_target_recipes.select(:id)
+    current_user.swipes.where(recipe_id: target_recipe_ids).delete_all
+    current_user.recipe_impressions.where(recipe_id: target_recipe_ids).delete_all
   end
 end

@@ -10,6 +10,8 @@
     </div>
 
     <%= form_with url: swipes_path, method: :get, class: "mt-8 space-y-8" do |f| %>
+      <%= hidden_field_tag :reset_progress, "true" %>
+
       <div data-controller="category-filter">
         <%= f.label :category_id, "カテゴリ", class: "block text-sm font-medium text-stone-700" %>
         <div class="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
