@@ -25,7 +25,7 @@ class SwipesController < ApplicationController
   private
 
   def filtered_recipes
-    recipes = Recipe.includes(:category, :tags, image_attachment: :blob).order(created_at: :desc)
+    recipes = Recipe.includes(:category, :tags, image_attachment: :blob).random_order
     recipes = recipes.where(category: @selected_category) if @selected_category.present?
     recipes = recipes.where(id: RecipeTag.where(tag_id: @selected_tags.select(:id)).select(:recipe_id)) if @selected_tags.any?
     recipes = recipes.where.not(id: current_user.swipes.select(:recipe_id))
