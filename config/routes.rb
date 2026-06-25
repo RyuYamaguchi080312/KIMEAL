@@ -10,7 +10,7 @@ Rails.application.routes.draw do
 
   root "top#index"
   get "home", to: "home#index"
-  resources :recipes, only: [:index]
+  resources :recipes, only: [:index, :show]
 
   namespace :admin do
     resources :recipes, only: [:index, :new, :create, :edit, :update, :destroy]

@@ -11,6 +11,10 @@ class RecipesController < ApplicationController
     @recipes = @recipes.where(category: @selected_category) if @selected_category.present?
   end
 
+  def show
+    @recipe = Recipe.includes(:category, :tags, image_attachment: :blob).find(params[:id])
+  end
+
   private
 
   def import_ranking_recipes
