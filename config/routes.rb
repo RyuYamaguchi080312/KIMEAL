@@ -11,6 +11,9 @@ Rails.application.routes.draw do
   root "top#index"
   get "home", to: "home#index"
   get "conditions", to: "conditions#index"
+  get "terms", to: "static_pages#terms"
+  get "privacy", to: "static_pages#privacy"
+  get "contact", to: "static_pages#contact"
   resources :candidates, only: [:index, :destroy] do
     member do
       post :select
