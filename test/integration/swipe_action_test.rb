@@ -89,6 +89,7 @@ class SwipeActionTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-controller='swipe-card']"
     assert_select "[data-swipe-card-target='card']"
+    assert_select "[data-swipe-card-target='likedCount']"
     assert_select "[data-swipe-card-save-url-value='#{swipes_path(format: :json)}']"
     assert_select "[data-swipe-card-batch-url-value]"
   end
