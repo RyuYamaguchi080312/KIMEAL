@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["deck", "card", "finished"]
+  static targets = ["deck", "card", "finished", "likedCount"]
   static values = {
     batchUrl: String,
     saveUrl: String
@@ -12,6 +12,7 @@ export default class extends Controller {
     this.prefetchThreshold = 3
     this.threshold = 80
     this.seenRecipeIds = this.cardTargets.map((card) => card.dataset.recipeId)
+    this.likedCount = this.initialLikedCount()
     this.resetState()
   }
 
@@ -83,6 +84,7 @@ export default class extends Controller {
     card.style.transform = `translateX(${this.currentX > 0 ? 120 : -120}%) rotate(${this.currentX > 0 ? 12 : -12}deg)`
 
     this.saveSwipe(recipeId, direction)
+    if (direction === "liked") this.incrementLikedCount()
     this.advance(card)
   }
 
@@ -161,7 +163,25 @@ export default class extends Controller {
 
   showFinished() {
     if (this.hasFinishedTarget) {
+      this.updateLikedCount()
       this.finishedTarget.classList.remove("hidden")
+    }
+  }
+
+  initialLikedCount() {
+    if (!this.hasLikedCountTarget) return 0
+
+    return Number.parseInt(this.likedCountTarget.textContent, 10) || 0
+  }
+
+  incrementLikedCount() {
+    this.likedCount += 1
+    this.updateLikedCount()
+  }
+
+  updateLikedCount() {
+    if (this.hasLikedCountTarget) {
+      this.likedCountTarget.textContent = `${this.likedCount}件`
     }
   }
 
