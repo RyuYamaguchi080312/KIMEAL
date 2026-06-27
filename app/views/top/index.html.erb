@@ -1,4 +1,26 @@
-<main class="top-page">
-  <h1>KIMEAL</h1>
-  <p>今日食べたい料理を、スワイプしながら直感的に決めるためのアプリです。</p>
+<main
+  class="relative min-h-screen bg-cover bg-center"
+  style="background-image: url('<%= asset_path "top_bg_image.png" %>')"
+>
+  <div class="absolute inset-0 bg-white/35"></div>
+  <div class="absolute inset-0 bg-gradient-to-b from-black/35 via-white/10 to-black/25"></div>
+
+  <section class="relative z-10 flex min-h-screen items-center justify-center px-4 pb-16 pt-28">
+    <div class="w-full max-w-3xl text-center">
+      <%= image_tag "kimeal_logo.png", alt: "KIMEAL", class: "mx-auto h-36 w-36 object-contain sm:h-44 sm:w-44" %>
+      <h1 class="mt-4 text-5xl font-bold tracking-[0.25em] text-stone-900 sm:text-6xl">KIMEAL</h1>
+      <p class="mt-6 text-xl font-medium tracking-wide text-stone-800 sm:text-2xl">今日の「おいしい」が、きっと見つかる。</p>
+
+      <div class="mx-auto mt-12 flex max-w-xl flex-col gap-5">
+        <%= link_to "新規登録", new_user_registration_path, class: "rounded-xl bg-orange-500 px-8 py-4 text-xl font-semibold text-white shadow-lg shadow-orange-900/20 hover:bg-orange-600" %>
+        <%= link_to "ログイン", new_user_session_path, class: "rounded-xl bg-white/95 px-8 py-4 text-xl font-semibold text-orange-600 shadow-lg shadow-slate-900/10 hover:bg-orange-50" %>
+      </div>
+
+      <div class="mt-16 flex flex-wrap justify-center gap-x-16 gap-y-4 text-base font-medium text-white drop-shadow">
+        <%= link_to "利用規約", "#", class: "hover:text-orange-100" %>
+        <%= link_to "プライバシーポリシー", "#", class: "hover:text-orange-100" %>
+        <%= link_to "お問い合わせ", "#", class: "hover:text-orange-100" %>
+      </div>
+    </div>
+  </section>
 </main>

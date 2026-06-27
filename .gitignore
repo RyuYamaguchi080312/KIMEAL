@@ -2,6 +2,7 @@
 
 /.bundle
 /.env*
+!/.env.example
 /.kamal/secrets
 /.rails_tmp
 /coverage
@@ -24,3 +25,6 @@
 
 .DS_Store
 Thumbs.db
+
+/app/assets/builds/*
+!/app/assets/builds/.keep

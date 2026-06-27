@@ -1,0 +1,48 @@
+<main class="mx-auto max-w-md px-4 py-10">
+  <div class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-orange-100">
+    <h1 class="text-2xl font-bold text-stone-950">新規登録</h1>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "mt-6 space-y-5" }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div>
+        <%= f.label :name, "名前", class: "block text-sm font-medium text-stone-700" %>
+        <%= f.text_field :name, autofocus: true, autocomplete: "name", class: ["mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2", resource.errors[:name].any? ? "is-invalid border-red-500 focus:ring-red-100" : "border-orange-200 focus:border-orange-400 focus:ring-orange-100"] %>
+        <% resource.errors[:name].each do |message| %>
+          <p class="field-error">名前<%= message %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= f.label :email, "メールアドレス", class: "block text-sm font-medium text-stone-700" %>
+        <%= f.email_field :email, autocomplete: "email", class: ["mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2", resource.errors[:email].any? ? "is-invalid border-red-500 focus:ring-red-100" : "border-orange-200 focus:border-orange-400 focus:ring-orange-100"] %>
+        <% resource.errors[:email].each do |message| %>
+          <p class="field-error">メールアドレス<%= message %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= f.label :password, "パスワード", class: "block text-sm font-medium text-stone-700" %>
+        <% if @minimum_password_length %>
+          <p class="mt-1 text-xs text-stone-500"><%= @minimum_password_length %>文字以上</p>
+        <% end %>
+        <%= f.password_field :password, autocomplete: "new-password", class: ["mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2", resource.errors[:password].any? ? "is-invalid border-red-500 focus:ring-red-100" : "border-orange-200 focus:border-orange-400 focus:ring-orange-100"] %>
+        <% resource.errors[:password].each do |message| %>
+          <p class="field-error">パスワード<%= message %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= f.label :password_confirmation, "パスワード確認", class: "block text-sm font-medium text-stone-700" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", class: ["mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2", resource.errors[:password_confirmation].any? ? "is-invalid border-red-500 focus:ring-red-100" : "border-orange-200 focus:border-orange-400 focus:ring-orange-100"] %>
+        <% resource.errors[:password_confirmation].each do |message| %>
+          <p class="field-error">パスワード確認<%= message %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= f.submit "登録", class: "w-full rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-600" %>
+      </div>
+    <% end %>
+  </div>
+</main>

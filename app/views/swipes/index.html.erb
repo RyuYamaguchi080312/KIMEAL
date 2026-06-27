@@ -1,0 +1,91 @@
+<main class="mx-auto max-w-4xl px-4 py-10">
+  <section class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-orange-100" aria-labelledby="swipes-title">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h1 id="swipes-title" class="text-2xl font-bold text-stone-950">レシピを探す</h1>
+        <p class="mt-3 text-sm text-stone-600">選択した条件に合うレシピ候補を表示します。</p>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <%= link_to "候補一覧", candidates_path, class: "rounded-lg border border-orange-200 px-4 py-2 text-center text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
+        <%= link_to "条件を変更", conditions_path, class: "rounded-lg border border-orange-200 px-4 py-2 text-center text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
+      </div>
+    </div>
+
+    <section class="mt-6 rounded-lg bg-orange-50 p-4" aria-labelledby="selected-conditions-title">
+      <h2 id="selected-conditions-title" class="text-sm font-semibold text-stone-900">選択中の条件</h2>
+
+      <dl class="mt-3 grid gap-3 text-sm text-stone-700 sm:grid-cols-2">
+        <div>
+          <dt class="font-medium text-stone-900">カテゴリ</dt>
+          <dd class="mt-1"><%= @selected_category&.name || "指定なし" %></dd>
+        </div>
+
+        <div>
+          <dt class="font-medium text-stone-900">タグ</dt>
+          <dd class="mt-1"><%= @selected_tags.any? ? @selected_tags.map(&:name).join("、") : "指定なし" %></dd>
+        </div>
+      </dl>
+    </section>
+
+    <% if @recipe.present? %>
+      <div
+        class="mt-6"
+        data-controller="swipe-card"
+        data-swipe-card-save-url-value="<%= swipes_path(format: :json) %>"
+        data-swipe-card-batch-url-value="<%= batch_swipes_path(format: :json, category_id: @selected_category&.id, tag_ids: @selected_tags.map(&:id)) %>"
+      >
+        <p class="text-center text-xs text-stone-500">右へスワイプ: 食べたい / 左へスワイプ: 今日は違う</p>
+
+        <div data-swipe-card-target="deck">
+          <% @recipes.each_with_index do |recipe, index| %>
+            <%= render "swipes/card", recipe: recipe, hidden: index.positive? %>
+          <% end %>
+        </div>
+
+        <section class="mt-6 hidden rounded-xl border border-orange-100 bg-orange-50 p-8 text-center" aria-labelledby="swipe-finished-title" data-swipe-card-target="finished">
+          <p class="text-sm font-semibold text-orange-700">スワイプ終了</p>
+          <h2 id="swipe-finished-title" class="mt-2 text-2xl font-bold text-stone-950">候補をすべて確認しました</h2>
+          <p class="mt-3 text-sm text-stone-600">
+            食べたい候補は <span class="font-semibold text-orange-700"><%= @liked_recipes.size %>件</span> です。
+          </p>
+
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <%= link_to "候補一覧を見る", candidates_path, class: "rounded-lg bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-orange-600" %>
+            <%= link_to "条件を選び直す", conditions_path, class: "rounded-lg border border-orange-200 bg-white px-5 py-3 text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
+          </div>
+        </section>
+
+      </div>
+    <% else %>
+      <section class="mt-6 rounded-xl border border-orange-100 bg-orange-50 p-8 text-center" aria-labelledby="swipe-finished-title">
+        <p class="text-sm font-semibold text-orange-700">スワイプ終了</p>
+        <h2 id="swipe-finished-title" class="mt-2 text-2xl font-bold text-stone-950">候補をすべて確認しました</h2>
+        <p class="mt-3 text-sm text-stone-600">
+          食べたい候補は <span class="font-semibold text-orange-700"><%= @liked_recipes.size %>件</span> です。
+        </p>
+
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <%= link_to "候補一覧を見る", candidates_path, class: "rounded-lg bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-orange-600" %>
+          <%= link_to "条件を選び直す", conditions_path, class: "rounded-lg border border-orange-200 bg-white px-5 py-3 text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @liked_recipes.any? %>
+      <section class="mt-8" aria-labelledby="liked-recipes-title">
+        <h2 id="liked-recipes-title" class="text-lg font-bold text-stone-950">食べたい候補</h2>
+
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          <% @liked_recipes.each do |recipe| %>
+            <article class="rounded-lg border border-orange-100 bg-orange-50/40 p-4">
+              <h3 class="font-semibold text-stone-950"><%= recipe.title %></h3>
+              <p class="mt-2 text-sm text-stone-600"><%= recipe.category.name %></p>
+              <%= link_to "詳細を見る", recipe_path(recipe), class: "mt-3 inline-flex text-sm font-semibold text-orange-700 hover:text-orange-900" %>
+            </article>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </section>
+</main>
