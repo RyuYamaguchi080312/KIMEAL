@@ -13,6 +13,8 @@ class RecipesController < ApplicationController
 
   def show
     @recipe = Recipe.includes(:category, :tags, image_attachment: :blob).find(params[:id])
+    @back_path = safe_return_path || recipes_path
+    @back_label = safe_return_path.present? ? "スワイプ画面へ戻る" : "一覧へ戻る"
   end
 
   private
@@ -25,5 +27,14 @@ class RecipesController < ApplicationController
     @rakuten_recipe_error = "楽天レシピAPIからレシピを取得できませんでした。"
   rescue RakutenRecipe::RankingImporter::ImportError
     @rakuten_recipe_error = "楽天レシピを保存できませんでした。"
+  end
+
+  def safe_return_path
+    return_path = params[:return_to].to_s
+    return if return_path.blank?
+    return if return_path.start_with?("//")
+    return unless return_path.start_with?("/")
+
+    return_path
   end
 end

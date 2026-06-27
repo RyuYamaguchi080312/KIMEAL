@@ -28,6 +28,25 @@
       </dl>
     </section>
 
+    <% if @show_relax_condition_prompt %>
+      <section class="mt-6" data-controller="relax-condition-loading" aria-live="polite">
+        <div class="rounded-lg border border-orange-200 bg-white p-4" aria-labelledby="relax-condition-title" data-relax-condition-loading-target="prompt">
+          <h2 id="relax-condition-title" class="text-sm font-semibold text-stone-950">条件に合うレシピが少ないです。</h2>
+          <p class="mt-2 text-sm text-stone-600">タグ条件を外して探しますか？</p>
+
+          <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+            <%= link_to "タグを外して探す", swipes_path(category_id: @selected_category.id, reset_progress: true), data: { action: "click->relax-condition-loading#show" }, class: "rounded-lg bg-orange-500 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-orange-600" %>
+            <%= link_to "この条件のまま探す", swipes_path(category_id: @selected_category.id, tag_ids: @selected_tags.map(&:id), keep_tag_condition: true), class: "rounded-lg border border-orange-200 px-4 py-2 text-center text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
+          </div>
+        </div>
+
+        <div class="hidden rounded-lg border border-orange-200 bg-orange-50 p-6 text-center" data-relax-condition-loading-target="loading">
+          <p class="text-sm font-semibold text-orange-700">レシピを探しています</p>
+          <p class="mt-2 text-sm text-stone-600">タグ条件を外して、条件に合うレシピを再検索しています。</p>
+        </div>
+      </section>
+    <% end %>
+
     <% if @recipe.present? %>
       <div
         class="mt-6"
@@ -39,7 +58,7 @@
 
         <div data-swipe-card-target="deck">
           <% @recipes.each_with_index do |recipe, index| %>
-            <%= render "swipes/card", recipe: recipe, hidden: index.positive? %>
+            <%= render "swipes/card", recipe: recipe, hidden: index.positive?, return_path: swipes_path(category_id: @selected_category&.id, tag_ids: @selected_tags.map(&:id), focus_recipe_id: recipe.id) %>
           <% end %>
         </div>
 
