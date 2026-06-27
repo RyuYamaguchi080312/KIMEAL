@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   resources :recipes, only: [:index, :show]
   resources :swipes, only: [:index, :create] do
     collection do
+      get :batch
       post :select
     end
   end

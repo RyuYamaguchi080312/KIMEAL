@@ -1,4 +1,5 @@
 class SwipesController < ApplicationController
+  BATCH_SIZE = 10
   RECENT_IMPRESSION_LIMIT = 10
 
   before_action :authenticate_user!
@@ -7,22 +8,40 @@ class SwipesController < ApplicationController
     @selected_category = Category.find_by(id: params[:category_id])
     @selected_tags = Tag.where(id: Array(params[:tag_ids]).reject(&:blank?)).order(:name)
     reset_progress if reset_progress_requested?
-    @recipes = filtered_recipes
+    @recipes = filtered_recipes.limit(BATCH_SIZE).to_a
     @recipe = @recipes.first
     @liked_recipes = liked_recipes
-    record_impression(@recipe) if @recipe.present?
+    record_impressions(@recipes)
   end
 
   def create
     recipe = Recipe.find(params[:recipe_id])
     direction = params[:direction].to_s
 
-    return redirect_to swipes_path(redirect_params), alert: "スワイプ結果を保存できませんでした。" unless Swipe.directions.key?(direction)
+    unless Swipe.directions.key?(direction)
+      return head :unprocessable_entity if request.format.json?
+
+      return redirect_to swipes_path(redirect_params), alert: "スワイプ結果を保存できませんでした。"
+    end
 
     swipe = Swipe.find_or_initialize_by(user: current_user, recipe: recipe)
     swipe.update!(direction: direction)
 
+    return head :no_content if request.format.json?
+
     redirect_to swipes_path(redirect_params)
+  end
+
+  def batch
+    @selected_category = Category.find_by(id: params[:category_id])
+    @selected_tags = Tag.where(id: Array(params[:tag_ids]).reject(&:blank?)).order(:name)
+    recipes = filtered_recipes.where.not(id: seen_recipe_ids).limit(BATCH_SIZE).to_a
+    record_impressions(recipes)
+
+    render json: {
+      recipes: recipes.map { |recipe| recipe_payload(recipe) },
+      finished: recipes.empty?
+    }
   end
 
   def select
@@ -85,6 +104,12 @@ class SwipesController < ApplicationController
     current_user.recipe_impressions.create!(recipe: recipe, displayed_at: Time.current)
   end
 
+  def record_impressions(recipes)
+    recipes.each do |recipe|
+      record_impression(recipe)
+    end
+  end
+
   def reset_progress_requested?
     params[:reset_progress] == "true"
   end
@@ -93,5 +118,20 @@ class SwipesController < ApplicationController
     target_recipe_ids = reset_target_recipes.select(:id)
     current_user.swipes.where(recipe_id: target_recipe_ids).delete_all
     current_user.recipe_impressions.where(recipe_id: target_recipe_ids).delete_all
+  end
+
+  def seen_recipe_ids
+    Array(params[:seen_recipe_ids]).reject(&:blank?)
+  end
+
+  def recipe_payload(recipe)
+    {
+      id: recipe.id,
+      html: render_to_string(
+        partial: "swipes/card",
+        formats: [:html],
+        locals: { recipe: recipe, hidden: true }
+      )
+    }
   end
 end

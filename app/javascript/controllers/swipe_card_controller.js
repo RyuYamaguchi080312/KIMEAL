@@ -1,11 +1,17 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["card", "likedForm", "rejectedForm"]
+  static targets = ["deck", "card", "finished"]
+  static values = {
+    batchUrl: String,
+    saveUrl: String
+  }
 
   connect() {
     this.edgeGuard = 24
+    this.prefetchThreshold = 3
     this.threshold = 80
+    this.seenRecipeIds = this.cardTargets.map((card) => card.dataset.recipeId)
     this.resetState()
   }
 
@@ -51,9 +57,9 @@ export default class extends Controller {
     const cardThreshold = Math.max(this.threshold, this.cardTarget.offsetWidth * 0.25)
 
     if (this.currentX >= cardThreshold) {
-      this.submit(this.likedFormTarget)
+      this.submit("liked")
     } else if (this.currentX <= -cardThreshold) {
-      this.submit(this.rejectedFormTarget)
+      this.submit("rejected")
     } else {
       this.reset()
     }
@@ -68,11 +74,99 @@ export default class extends Controller {
     this.resetState()
   }
 
-  submit(form) {
+  submit(direction) {
+    const card = this.cardTarget
+    const recipeId = card.dataset.recipeId
+
     this.cancelRender()
-    this.cardTarget.classList.add("transition-transform")
-    this.cardTarget.style.transform = `translateX(${this.currentX > 0 ? 120 : -120}%) rotate(${this.currentX > 0 ? 12 : -12}deg)`
-    form.requestSubmit()
+    card.classList.add("transition-transform")
+    card.style.transform = `translateX(${this.currentX > 0 ? 120 : -120}%) rotate(${this.currentX > 0 ? 12 : -12}deg)`
+
+    this.saveSwipe(recipeId, direction)
+    this.advance(card)
+  }
+
+  advance(card) {
+    card.remove()
+    this.resetState()
+
+    const nextCard = this.cardTargets[0]
+
+    if (nextCard) {
+      nextCard.classList.remove("hidden")
+      this.fetchMoreIfNeeded()
+    } else {
+      this.fetchMoreIfNeeded(true)
+    }
+  }
+
+  fetchMoreIfNeeded(force = false) {
+    if (this.loadingBatch) return
+    if (!force && this.cardTargets.length > this.prefetchThreshold) return
+
+    this.loadingBatch = true
+    fetch(this.batchUrlWithSeenIds(), {
+      headers: { Accept: "application/json" }
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch recipe batch")
+        return response.json()
+      })
+      .then((data) => {
+        data.recipes.forEach((recipe) => {
+          this.deckTarget.insertAdjacentHTML("beforeend", recipe.html)
+          this.seenRecipeIds.push(String(recipe.id))
+        })
+
+        const nextCard = this.cardTargets[0]
+        if (nextCard) {
+          nextCard.classList.remove("hidden")
+        } else if (data.finished) {
+          this.showFinished()
+        }
+      })
+      .catch(() => {
+        if (force && this.cardTargets.length === 0) this.showFinished()
+      })
+      .finally(() => {
+        this.loadingBatch = false
+      })
+  }
+
+  batchUrlWithSeenIds() {
+    const url = new URL(this.batchUrlValue, window.location.origin)
+
+    this.seenRecipeIds.forEach((id) => {
+      url.searchParams.append("seen_recipe_ids[]", id)
+    })
+
+    return url.toString()
+  }
+
+  saveSwipe(recipeId, direction) {
+    const body = new URLSearchParams()
+    body.append("recipe_id", recipeId)
+    body.append("direction", direction)
+
+    fetch(this.saveUrlValue, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRF-Token": this.csrfToken()
+      },
+      body
+    })
+  }
+
+  showFinished() {
+    if (this.hasFinishedTarget) {
+      this.finishedTarget.classList.remove("hidden")
+    }
+  }
+
+  csrfToken() {
+    return document.querySelector("meta[name='csrf-token']").content
   }
 
   requestRender() {
