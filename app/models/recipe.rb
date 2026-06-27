@@ -1,4 +1,5 @@
 class Recipe < ApplicationRecord
+  # 管理画面のフォームではカテゴリ名・タグ名を直接入力するため、DBカラムではない一時属性として扱う。
   attr_accessor :category_name, :tag_names
 
   belongs_to :category
@@ -13,6 +14,7 @@ class Recipe < ApplicationRecord
 
   enum :source_type, { original: 0, external_api: 1 }
 
+  # スワイプ候補を毎回同じ順番にしないためのランダム取得スコープ。
   scope :random_order, -> { order(Arel.sql("RANDOM()")) }
 
   validates :title, presence: true
