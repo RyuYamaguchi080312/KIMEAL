@@ -1,13 +1,24 @@
 ja:
   activerecord:
+    models:
+      user: "ユーザー"
+      category: "カテゴリ"
+      tag: "タグ"
+      recipe: "レシピ"
+      recipe_tag: "レシピタグ"
+      swipe: "スワイプ"
+      recipe_impression: "レシピ表示履歴"
+      daily_selection: "今日の一品"
     attributes:
       user:
         email: "メールアドレス"
         password: "パスワード"
         password_confirmation: "パスワード確認"
         name: "名前"
+        role: "権限"
       category:
         name: "カテゴリ名"
+        external_id: "外部ID"
       tag:
         name: "タグ名"
       recipe:
@@ -19,6 +30,32 @@ ja:
         cooking_time: "調理時間"
         category: "カテゴリ"
         category_id: "カテゴリ"
+        source_type: "取得元"
+        external_id: "外部ID"
+        source_url: "参照URL"
+      recipe_tag:
+        recipe: "レシピ"
+        recipe_id: "レシピ"
+        tag: "タグ"
+        tag_id: "タグ"
+      swipe:
+        user: "ユーザー"
+        user_id: "ユーザー"
+        recipe: "レシピ"
+        recipe_id: "レシピ"
+        direction: "スワイプ結果"
+      recipe_impression:
+        user: "ユーザー"
+        user_id: "ユーザー"
+        recipe: "レシピ"
+        recipe_id: "レシピ"
+        displayed_at: "表示日時"
+      daily_selection:
+        user: "ユーザー"
+        user_id: "ユーザー"
+        recipe: "レシピ"
+        recipe_id: "レシピ"
+        selected_on: "選択日"
 
   time:
     formats:
@@ -29,6 +66,17 @@ ja:
     messages:
       blank: "を入力してください"
       taken: "はすでに存在します"
+      required: "を入力してください"
+      invalid: "は不正な値です"
+      confirmation: "と一致しません"
+      too_short: "は%{count}文字以上で入力してください"
+      too_long: "は%{count}文字以内で入力してください"
+      wrong_length: "は%{count}文字で入力してください"
+      not_a_number: "は数値で入力してください"
+      greater_than: "は%{count}より大きい値にしてください"
+      greater_than_or_equal_to: "は%{count}以上の値にしてください"
+      less_than: "は%{count}より小さい値にしてください"
+      less_than_or_equal_to: "は%{count}以下の値にしてください"
 
   devise:
     failure:
@@ -36,6 +84,8 @@ ja:
       invalid: "メールアドレスまたはパスワードが違います。"
       not_found_in_database: "メールアドレスまたはパスワードが違います。"
       unauthenticated: "ログインしてください。"
+      user:
+        unauthenticated: "ログインしてください。"
     registrations:
       signed_up: "アカウント登録が完了しました。"
     sessions:
