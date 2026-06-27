@@ -13,4 +13,12 @@ namespace :rakuten_recipe do
     count = RakutenRecipe::RankingImporter.new.import(category).count
     puts "#{category.name} のレシピを#{count}件保存しました"
   end
+
+  desc "楽天レシピAPIから小分類カテゴリのランキングレシピを目標件数まで保存する"
+  task :import_rankings_until, [:target_count, :sleep_seconds] => :environment do |_task, args|
+    RakutenRecipe::BulkRankingImporter.new.import(
+      target_count: args[:target_count],
+      sleep_seconds: args[:sleep_seconds]
+    )
+  end
 end
