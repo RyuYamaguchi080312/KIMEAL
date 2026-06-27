@@ -19,6 +19,7 @@ class RecipesController < ApplicationController
 
   private
 
+  # レシピ一覧でカテゴリを選んだ時に、楽天ランキングを取得してDBへ保存する。
   def import_ranking_recipes
     RakutenRecipe::RankingImporter.new.import(@selected_category)
   rescue RakutenRecipe::Client::MissingCredentialsError
@@ -29,6 +30,8 @@ class RecipesController < ApplicationController
     @rakuten_recipe_error = "楽天レシピを保存できませんでした。"
   end
 
+  # 詳細画面から戻るリンクに使うパス。
+  # 外部URLや「//example.com」のようなURLは許可せず、アプリ内の相対パスだけを採用する。
   def safe_return_path
     return_path = params[:return_to].to_s
     return if return_path.blank?

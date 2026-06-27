@@ -16,6 +16,8 @@ class SwipesController < ApplicationController
     record_impressions(@recipes)
   end
 
+  # スワイプ結果を保存する。
+  # HTMLリクエストでは従来の画面遷移、JSONリクエストでは画面内スワイプ用に204だけ返す。
   def create
     recipe = Recipe.find(params[:recipe_id])
     direction = params[:direction].to_s
@@ -34,6 +36,7 @@ class SwipesController < ApplicationController
     redirect_to swipes_path(redirect_params)
   end
 
+  # 画面内スワイプでカードが少なくなった時に、追加候補をJSONで返す。
   def batch
     @selected_category = Category.find_by(id: params[:category_id])
     @selected_tags = Tag.where(id: Array(params[:tag_ids]).reject(&:blank?)).order(:name)
@@ -57,6 +60,8 @@ class SwipesController < ApplicationController
 
   private
 
+  # 条件に合う候補を返す。
+  # 直近表示したレシピは除外するが、除外すると候補が尽きる場合は元の候補に戻す。
   def filtered_recipes
     recipes = base_filtered_recipes
     recipes_without_recent_impressions = recipes.where.not(id: recent_impression_recipe_ids)
@@ -66,6 +71,7 @@ class SwipesController < ApplicationController
     recipes
   end
 
+  # 詳細画面から戻った場合は、見ていたレシピを先頭カードに戻す。
   def swipe_recipes
     recipes = filtered_recipes.limit(BATCH_SIZE).to_a
     focus_recipe = focused_recipe
@@ -81,6 +87,8 @@ class SwipesController < ApplicationController
     base_filtered_recipes.find_by(id: params[:focus_recipe_id])
   end
 
+  # カテゴリ・タグ・スワイプ済み除外だけを適用した候補。
+  # 表示履歴の除外を含めないため、詳細画面から戻るレシピの再取得にも使える。
   def base_filtered_recipes
     recipes = Recipe.includes(:category, :tags, image_attachment: :blob).random_order
     recipes = recipes.where(category: @selected_category) if @selected_category.present?
@@ -137,6 +145,8 @@ class SwipesController < ApplicationController
     current_user.recipe_impressions.where(recipe_id: target_recipe_ids).delete_all
   end
 
+  # DB内の候補が少ない場合に、楽天APIからカテゴリのランキングレシピを補充する。
+  # API失敗時もスワイプ画面自体は表示したいので、例外はログに残して握りつぶす。
   def refill_recipes_if_needed
     return unless should_refill_recipes?
 
@@ -147,6 +157,7 @@ class SwipesController < ApplicationController
     Rails.logger.warn("Rakuten recipe refill failed: #{e.class} #{e.message}")
   end
 
+  # 楽天APIにはKIMEAL独自タグがないため、タグ条件ありの場合は補充対象外にしている。
   def should_refill_recipes?
     @selected_category.present? &&
       @selected_category.external_id.present? &&
@@ -154,6 +165,7 @@ class SwipesController < ApplicationController
       filtered_recipes.limit(BATCH_SIZE).count < BATCH_SIZE
   end
 
+  # タグ条件で候補が少ない場合に、タグを外して探す提案を出すか判定する。
   def show_relax_condition_prompt?
     @selected_category.present? &&
       @selected_tags.any? &&
