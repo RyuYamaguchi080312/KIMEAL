@@ -1,16 +1,26 @@
 # frozen_string_literal: true
 
 module RakutenRecipe
+  # ステージング・本番環境で楽天レシピをまとめて投入するための運用サービス。
+  # 手動でカテゴリIDを変えながらrunnerを叩く代わりに、目標件数まで順番に取り込む。
   class BulkRankingImporter
     DEFAULT_TARGET_COUNT = 100
     DEFAULT_SLEEP_SECONDS = 5
 
+    # @param importer [#import] 1カテゴリ分のランキングを取り込むオブジェクト
+    # @param io [#puts] 実行結果を出力するIO
+    # @param sleeper [#call] API制限対策の待機処理
     def initialize(importer: RankingImporter.new, io: $stdout, sleeper: ->(seconds) { sleep seconds })
       @importer = importer
       @io = io
       @sleeper = sleeper
     end
 
+    # 楽天API由来レシピを指定件数分追加する。
+    #
+    # @param target_count [Integer, String, nil] 追加したいレシピ件数
+    # @param sleep_seconds [Integer, String, nil] カテゴリごとの待機秒数
+    # @return [void]
     def import(target_count: DEFAULT_TARGET_COUNT, sleep_seconds: DEFAULT_SLEEP_SECONDS)
       target_count = normalize_count(target_count, DEFAULT_TARGET_COUNT)
       sleep_seconds = normalize_count(sleep_seconds, DEFAULT_SLEEP_SECONDS)
@@ -34,6 +44,7 @@ module RakutenRecipe
     attr_reader :importer, :io, :sleeper
 
     def target_categories
+      # 楽天ランキング取得で使いやすい小分類カテゴリだけを対象にし、既に投入済みのカテゴリはスキップする。
       Category.where("external_id LIKE ?", "%-%-%")
               .where.not(id: Recipe.external_api.select(:category_id))
               .order(:id)
