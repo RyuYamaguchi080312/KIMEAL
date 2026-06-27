@@ -8,6 +8,7 @@ class SwipesController < ApplicationController
     @selected_category = Category.find_by(id: params[:category_id])
     @selected_tags = Tag.where(id: Array(params[:tag_ids]).reject(&:blank?)).order(:name)
     reset_progress if reset_progress_requested?
+    refill_recipes_if_needed
     @recipes = filtered_recipes.limit(BATCH_SIZE).to_a
     @recipe = @recipes.first
     @liked_recipes = liked_recipes
@@ -118,6 +119,23 @@ class SwipesController < ApplicationController
     target_recipe_ids = reset_target_recipes.select(:id)
     current_user.swipes.where(recipe_id: target_recipe_ids).delete_all
     current_user.recipe_impressions.where(recipe_id: target_recipe_ids).delete_all
+  end
+
+  def refill_recipes_if_needed
+    return unless should_refill_recipes?
+
+    RakutenRecipe::RankingImporter.new.import(@selected_category)
+  rescue RakutenRecipe::Client::MissingCredentialsError,
+         RakutenRecipe::Client::RequestError,
+         RakutenRecipe::RankingImporter::ImportError => e
+    Rails.logger.warn("Rakuten recipe refill failed: #{e.class} #{e.message}")
+  end
+
+  def should_refill_recipes?
+    @selected_category.present? &&
+      @selected_category.external_id.present? &&
+      @selected_tags.empty? &&
+      filtered_recipes.limit(BATCH_SIZE).count < BATCH_SIZE
   end
 
   def seen_recipe_ids
