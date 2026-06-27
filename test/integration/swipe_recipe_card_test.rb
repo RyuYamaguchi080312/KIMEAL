@@ -23,8 +23,22 @@ class SwipeRecipeCardTest < ActionDispatch::IntegrationTest
       assert_select "h2", text: "親子丼"
       assert_select "p", text: "主菜"
       assert_select "span", text: "時短"
-      assert_select "a[href='#{recipe_path(recipe)}']", text: "詳細を見る"
+      assert_select "a[href='#{recipe_path(recipe, return_to: swipes_path(focus_recipe_id: recipe.id))}']", text: "詳細を見る"
     end
+  end
+
+  test "詳細画面から戻ったレシピを先頭カードに表示できる" do
+    user = create_user(email: "swipe-card-focused@example.com")
+    category = Category.create!(name: "主菜")
+    create_recipe(title: "別のレシピ", category: category)
+    focused_recipe = create_recipe(title: "戻りたいレシピ", category: category)
+
+    sign_in_as(user)
+    get swipes_path(category_id: category.id, focus_recipe_id: focused_recipe.id)
+
+    assert_response :success
+    first_card_title = Nokogiri::HTML(response.body).at_css("[data-swipe-card-target='card'] h2").text
+    assert_equal "戻りたいレシピ", first_card_title
   end
 
   private
@@ -45,5 +59,13 @@ class SwipeRecipeCardTest < ActionDispatch::IntegrationTest
         password: "password"
       }
     }
+  end
+
+  def create_recipe(title:, category:)
+    Recipe.create!(
+      category: category,
+      title: title,
+      source_type: :original
+    )
   end
 end

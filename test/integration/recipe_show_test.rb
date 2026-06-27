@@ -50,6 +50,23 @@ class RecipeShowTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{recipe_path(recipe)}']", text: "詳細を見る"
   end
 
+  test "スワイプ画面から遷移した場合はスワイプ画面へ戻れる" do
+    user = create_user(email: "recipe-show-back-to-swipe@example.com")
+    category = Category.create!(name: "主菜")
+    recipe = Recipe.create!(
+      category: category,
+      title: "肉じゃが",
+      source_type: :original
+    )
+
+    sign_in_as(user)
+    get recipe_path(recipe, return_to: swipes_path(category_id: category.id))
+
+    assert_response :success
+    assert_select "a[href='#{swipes_path(category_id: category.id)}']", text: "スワイプ画面へ戻る"
+    assert_select "a[href='#{recipes_path}']", text: "一覧へ戻る", count: 0
+  end
+
   test "楽天レシピ由来で作り方が未登録の場合は楽天レシピへのリンクを表示する" do
     user = create_user(email: "recipe-show-source-url@example.com")
     category = Category.create!(name: "ラム肉", external_id: "10-69-45")

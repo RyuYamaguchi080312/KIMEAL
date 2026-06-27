@@ -33,7 +33,7 @@
     <% end %>
 
     <div class="mt-4 flex flex-wrap gap-2">
-      <%= link_to "詳細を見る", recipe_path(recipe), class: "rounded-md border border-orange-200 px-3 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
+      <%= link_to "詳細を見る", recipe_path(recipe, return_to: local_assigns[:return_path]), class: "rounded-md border border-orange-200 px-3 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
       <%= button_to "今日の一品に決定", select_swipes_path, params: { recipe_id: recipe.id }, class: "rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600" %>
     </div>
   </div>

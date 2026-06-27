@@ -8,9 +8,11 @@ class SwipesController < ApplicationController
     @selected_category = Category.find_by(id: params[:category_id])
     @selected_tags = Tag.where(id: Array(params[:tag_ids]).reject(&:blank?)).order(:name)
     reset_progress if reset_progress_requested?
-    @recipes = filtered_recipes.limit(BATCH_SIZE).to_a
+    refill_recipes_if_needed
+    @recipes = swipe_recipes
     @recipe = @recipes.first
     @liked_recipes = liked_recipes
+    @show_relax_condition_prompt = show_relax_condition_prompt?
     record_impressions(@recipes)
   end
 
@@ -62,6 +64,21 @@ class SwipesController < ApplicationController
     return recipes_without_recent_impressions if recipes_without_recent_impressions.exists?
 
     recipes
+  end
+
+  def swipe_recipes
+    recipes = filtered_recipes.limit(BATCH_SIZE).to_a
+    focus_recipe = focused_recipe
+
+    return recipes if focus_recipe.blank?
+
+    [focus_recipe, *recipes.reject { |recipe| recipe.id == focus_recipe.id }].first(BATCH_SIZE)
+  end
+
+  def focused_recipe
+    return if params[:focus_recipe_id].blank?
+
+    base_filtered_recipes.find_by(id: params[:focus_recipe_id])
   end
 
   def base_filtered_recipes
@@ -120,6 +137,30 @@ class SwipesController < ApplicationController
     current_user.recipe_impressions.where(recipe_id: target_recipe_ids).delete_all
   end
 
+  def refill_recipes_if_needed
+    return unless should_refill_recipes?
+
+    RakutenRecipe::RankingImporter.new.import(@selected_category)
+  rescue RakutenRecipe::Client::MissingCredentialsError,
+         RakutenRecipe::Client::RequestError,
+         RakutenRecipe::RankingImporter::ImportError => e
+    Rails.logger.warn("Rakuten recipe refill failed: #{e.class} #{e.message}")
+  end
+
+  def should_refill_recipes?
+    @selected_category.present? &&
+      @selected_category.external_id.present? &&
+      @selected_tags.empty? &&
+      filtered_recipes.limit(BATCH_SIZE).count < BATCH_SIZE
+  end
+
+  def show_relax_condition_prompt?
+    @selected_category.present? &&
+      @selected_tags.any? &&
+      params[:keep_tag_condition] != "true" &&
+      filtered_recipes.limit(BATCH_SIZE).count < BATCH_SIZE
+  end
+
   def seen_recipe_ids
     Array(params[:seen_recipe_ids]).reject(&:blank?)
   end
@@ -130,8 +171,16 @@ class SwipesController < ApplicationController
       html: render_to_string(
         partial: "swipes/card",
         formats: [:html],
-        locals: { recipe: recipe, hidden: true }
+        locals: { recipe: recipe, hidden: true, return_path: swipes_return_path(recipe) }
       )
     }
+  end
+
+  def swipes_return_path(recipe)
+    swipes_path(
+      category_id: @selected_category&.id,
+      tag_ids: @selected_tags.map(&:id),
+      focus_recipe_id: recipe.id
+    )
   end
 end
