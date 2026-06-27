@@ -7,9 +7,14 @@ module RakutenRecipe
 
     BASE_URL = "https://openapi.rakuten.co.jp/recipems/api/Recipe"
 
-    def initialize(application_id: ENV["RAKUTEN_APPLICATION_ID"], access_key: ENV["RAKUTEN_ACCESS_KEY"])
+    def initialize(
+      application_id: ENV["RAKUTEN_APPLICATION_ID"],
+      access_key: ENV["RAKUTEN_ACCESS_KEY"],
+      request_origin: ENV["RAKUTEN_REQUEST_ORIGIN"]
+    )
       @application_id = application_id
       @access_key = access_key
+      @request_origin = request_origin
     end
 
     def category_list(category_type: nil)
@@ -25,12 +30,12 @@ module RakutenRecipe
 
     private
 
-    attr_reader :application_id, :access_key
+    attr_reader :application_id, :access_key, :request_origin
 
     def get(path, params)
       validate_credentials!
 
-      response = Faraday.get("#{BASE_URL}/#{path}", default_params.merge(params))
+      response = Faraday.get("#{BASE_URL}/#{path}", default_params.merge(params), request_headers)
       raise RequestError, "Rakuten Recipe API request failed: #{response.status}" unless response.success?
 
       JSON.parse(response.body)
@@ -45,6 +50,19 @@ module RakutenRecipe
         format: "json",
         formatVersion: 2
       }
+    end
+
+    def request_headers
+      return {} if normalized_request_origin.blank?
+
+      {
+        "Origin" => normalized_request_origin,
+        "Referer" => "#{normalized_request_origin}/"
+      }
+    end
+
+    def normalized_request_origin
+      request_origin.to_s.chomp("/")
     end
 
     def validate_credentials!
