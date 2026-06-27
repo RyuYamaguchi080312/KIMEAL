@@ -29,59 +29,33 @@
     </section>
 
     <% if @recipe.present? %>
-      <div class="mt-6" data-controller="swipe-card">
+      <div
+        class="mt-6"
+        data-controller="swipe-card"
+        data-swipe-card-save-url-value="<%= swipes_path(format: :json) %>"
+        data-swipe-card-batch-url-value="<%= batch_swipes_path(format: :json, category_id: @selected_category&.id, tag_ids: @selected_tags.map(&:id)) %>"
+      >
         <p class="text-center text-xs text-stone-500">右へスワイプ: 食べたい / 左へスワイプ: 今日は違う</p>
 
-        <article
-          class="mx-auto mt-3 max-w-md overflow-hidden rounded-xl border border-orange-100 bg-orange-50/40 shadow-sm select-none will-change-transform [touch-action:pan-y]"
-          data-swipe-card-target="card"
-          data-action="pointerdown->swipe-card#start pointermove->swipe-card#move pointerup->swipe-card#end pointercancel->swipe-card#reset"
-        >
-          <% if @recipe.image.attached? %>
-            <%= image_tag @recipe.image, alt: @recipe.title, class: "h-56 w-full object-cover" %>
-          <% elsif @recipe.image_url.present? %>
-            <%= image_tag @recipe.image_url, alt: @recipe.title, class: "h-56 w-full object-cover" %>
-          <% else %>
-            <div class="flex h-56 items-center justify-center bg-orange-100 text-sm font-semibold text-orange-700">
-              No Image
-            </div>
+        <div data-swipe-card-target="deck">
+          <% @recipes.each_with_index do |recipe, index| %>
+            <%= render "swipes/card", recipe: recipe, hidden: index.positive? %>
           <% end %>
+        </div>
 
-          <div class="p-5">
-            <h2 class="text-xl font-semibold text-stone-950"><%= @recipe.title %></h2>
-            <p class="mt-2 text-sm text-stone-600"><%= @recipe.category.name %></p>
+        <section class="mt-6 hidden rounded-xl border border-orange-100 bg-orange-50 p-8 text-center" aria-labelledby="swipe-finished-title" data-swipe-card-target="finished">
+          <p class="text-sm font-semibold text-orange-700">スワイプ終了</p>
+          <h2 id="swipe-finished-title" class="mt-2 text-2xl font-bold text-stone-950">候補をすべて確認しました</h2>
+          <p class="mt-3 text-sm text-stone-600">
+            食べたい候補は <span class="font-semibold text-orange-700"><%= @liked_recipes.size %>件</span> です。
+          </p>
 
-            <div class="mt-3 flex flex-wrap gap-2">
-              <% if @recipe.tags.any? %>
-                <% @recipe.tags.each do |tag| %>
-                  <span class="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-100"><%= tag.name %></span>
-                <% end %>
-              <% else %>
-                <span class="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-stone-500 ring-1 ring-orange-100">タグ未設定</span>
-              <% end %>
-            </div>
-
-            <% if @recipe.description.present? %>
-              <p class="mt-3 line-clamp-3 text-sm text-stone-600"><%= @recipe.description %></p>
-            <% end %>
-
-            <div class="mt-4 flex flex-wrap gap-2">
-              <%= link_to "詳細を見る", recipe_path(@recipe), class: "rounded-md border border-orange-200 px-3 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
-              <%= button_to "今日の一品に決定", select_swipes_path, params: { recipe_id: @recipe.id }, class: "rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-600" %>
-            </div>
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <%= link_to "候補一覧を見る", candidates_path, class: "rounded-lg bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-orange-600" %>
+            <%= link_to "条件を選び直す", conditions_path, class: "rounded-lg border border-orange-200 bg-white px-5 py-3 text-sm font-semibold text-orange-700 hover:bg-orange-50" %>
           </div>
-        </article>
+        </section>
 
-        <% [:liked, :rejected].each do |direction| %>
-          <%= form_with url: swipes_path, method: :post, class: "hidden", data: { swipe_card_target: "#{direction}Form" } do %>
-            <%= hidden_field_tag :recipe_id, @recipe.id %>
-            <%= hidden_field_tag :direction, direction %>
-            <%= hidden_field_tag :category_id, @selected_category.id if @selected_category.present? %>
-            <% @selected_tags.each do |tag| %>
-              <%= hidden_field_tag "tag_ids[]", tag.id %>
-            <% end %>
-          <% end %>
-        <% end %>
       </div>
     <% else %>
       <section class="mt-6 rounded-xl border border-orange-100 bg-orange-50 p-8 text-center" aria-labelledby="swipe-finished-title">

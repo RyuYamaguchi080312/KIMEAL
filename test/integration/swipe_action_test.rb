@@ -18,6 +18,21 @@ class SwipeActionTest < ActionDispatch::IntegrationTest
     assert_predicate swipe, :liked?
   end
 
+  test "JSONリクエストではスワイプ結果を保存してリダイレクトしない" do
+    user = create_user(email: "swipe-liked-json@example.com")
+    category = Category.create!(name: "主菜")
+    recipe = create_recipe(title: "親子丼", category: category)
+
+    sign_in_as(user)
+    post swipes_path(format: :json), params: {
+      recipe_id: recipe.id,
+      direction: "liked"
+    }
+
+    assert_response :no_content
+    assert_predicate Swipe.find_by!(user: user, recipe: recipe), :liked?
+  end
+
   test "ログイン済みユーザーは左スワイプ相当で今日は違うを保存できる" do
     user = create_user(email: "swipe-rejected@example.com")
     category = Category.create!(name: "主菜")
@@ -74,8 +89,8 @@ class SwipeActionTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-controller='swipe-card']"
     assert_select "[data-swipe-card-target='card']"
-    assert_select "form[data-swipe-card-target='likedForm']"
-    assert_select "form[data-swipe-card-target='rejectedForm']"
+    assert_select "[data-swipe-card-save-url-value='#{swipes_path(format: :json)}']"
+    assert_select "[data-swipe-card-batch-url-value]"
   end
 
   test "未ログインユーザーはスワイプ結果を保存できない" do
