@@ -38,12 +38,15 @@ class StaticPagesTest < ActionDispatch::IntegrationTest
     assert_select "footer a[href='https://developers.rakuten.com/']", text: "Supported by Rakuten Developers"
   end
 
-  test "トップ画面から各ページへ遷移できる" do
+  test "トップ画面では共通フッターから各ページへ遷移できる" do
     get root_path
 
     assert_response :success
-    assert_select "main a[href='#{terms_path}']", text: "利用規約"
-    assert_select "main a[href='#{privacy_path}']", text: "プライバシーポリシー"
-    assert_select "main a[href='#{contact_path}']", text: "お問い合わせ"
+    assert_select "main a[href='#{terms_path}']", text: "利用規約", count: 0
+    assert_select "main a[href='#{privacy_path}']", text: "プライバシーポリシー", count: 0
+    assert_select "main a[href='#{contact_path}']", text: "お問い合わせ", count: 0
+    assert_select "footer a[href='#{terms_path}']", text: "利用規約"
+    assert_select "footer a[href='#{privacy_path}']", text: "プライバシーポリシー"
+    assert_select "footer a[href='#{contact_path}']", text: "お問い合わせ"
   end
 end
